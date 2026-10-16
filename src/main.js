@@ -415,7 +415,9 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) saveA
 /* ---------- start-up ---------- */
 async function boot() {
   try {
-    const [teams, squads] = await Promise.all([fetch('data/teams.json').then(r => r.json()), fetch('data/squads.json').then(r => r.json())]);
+    // The one-file build carries the data inside the page; the source version fetches it.
+    const inline = window.MUG_DATA;
+    const [teams, squads] = inline ? [inline.teams, inline.squads] : await Promise.all([fetch('data/teams.json').then(r => r.json()), fetch('data/squads.json').then(r => r.json())]);
     app.data = teams;
     setEnv({ squads });
   } catch (e) {

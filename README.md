@@ -36,23 +36,33 @@ Extra dice until somebody blinks. League and group games can finish level.
 
 ## Running it
 
-It's a static site: plain HTML, CSS and JavaScript modules, no build step.
-Browsers won't load modules from a file opened straight off your computer, so
-run it through a little web server:
-
-```
-npm run dev          # then open http://localhost:5173
-```
-
-(or `python3 -m http.server 5173` if you'd rather not use Node).
+`index.html` is the whole game in one file: styles, code and club data all
+inside it. Open it straight from your computer, or put it anywhere online.
+It's the only file Vercel or GitHub Pages actually needs.
 
 ## Putting it online
 
-**Vercel**: push this folder to GitHub, then "Add New Project" in Vercel and
-import the repo. Framework preset "Other", no build command, output directory
-is the root. `vercel.json` is already here.
+**Vercel**: import the GitHub repo with framework preset "Other", no build
+command, and the output directory left as the root. Even if only `index.html`
+makes it into the repo, the site works.
 
-**GitHub Pages** works too: Settings, then Pages, serve from the `main` branch.
+**GitHub Pages**: Settings, then Pages, serve from the `main` branch root.
+
+## Changing it
+
+The source lives in `dev.html`, `css/` and `src/`. While working on it:
+
+```
+npm install
+npm run dev          # then open http://localhost:5173/dev.html
+```
+
+When you're happy, rebuild the one-file version and commit it:
+
+```
+npm run build        # rewrites index.html from dev.html, css/ and src/
+npm test             # plays every ready-made cup and a whole season
+```
 
 ## Where things are saved
 
@@ -93,6 +103,7 @@ src/engine/   the rules, with no browser code: dice, matches and scorers,
 src/ui/       the screens: the mug, the dice, cup mode, season mode, book,
               almanac, drawer, wallchart, share image, sound, saving
 src/main.js   start-up, routing, clicks, the hand, keys
+dev.html      the page you work on; index.html is built from it
 tests/        npm test plays every ready-made cup and a whole season
 ```
 
