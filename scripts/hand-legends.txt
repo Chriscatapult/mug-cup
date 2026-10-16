@@ -1,0 +1,155 @@
+# Club name:Legend,Legend,... (past or present players who can pop up and score)
+Arsenal:Henry,Bergkamp,Wright,Adams,Vieira,Pires,Saka,Brady
+Aston Villa:Withe,McGrath,Yorke,Platt,Agbonlahor,Grealish,Watkins,Morley
+Bournemouth:Wilson,King,Solanke,Semenyo,Pugh
+Brentford:Toney,Mbeumo,Wissa,Canós
+Brighton & Hove Albion:Ward,Zamora,Murray,March,Groß,Mitoma,Welbeck,Knockaert
+Burnley:Ings,Barnes,Gray,Vokes,Rodriguez,Blake
+Chelsea:Zola,Drogba,Lampard,Terry,Osgood,Hasselbaink,Palmer,Hazard
+Crystal Palace:Wright,Bright,Zaha,Eze,Mateta,Johnson,Salako
+Everton:Dean,Lineker,Sharp,Ferguson,Cahill,Rooney,Calvert-Lewin,Sheedy
+Fulham:Haynes,Mitrović,Dempsey,Saha,Zamora,Murphy
+Leeds United:Bremner,Clarke,Lorimer,Yeboah,Viduka,Kewell,Bamford,Strachan
+Liverpool:Dalglish,Rush,Fowler,Gerrard,Owen,Salah,Keegan,Barnes
+Manchester City:Agüero,Bell,Lee,Haaland,De Bruyne,Kinkladze,Summerbee,Goater
+Manchester United:Best,Charlton,Law,Cantona,Giggs,Scholes,Rooney,Ronaldo
+Newcastle United:Shearer,Beardsley,Ginola,Asprilla,Cole,Milburn,Ferdinand,Isak
+Nottingham Forest:Clough,Pearce,Robertson,Birtles,Woodcock,Collymore,Wood,Gibbs-White
+Sunderland:Quinn,Phillips,Gabbiadini,Porterfield,Shackleton,Defoe
+Tottenham Hotspur:Greaves,Hoddle,Lineker,Klinsmann,Kane,Son,Gascoigne,Ardiles
+West Ham United:Moore,Hurst,Peters,Di Canio,Cottee,Bowen,Noble,Brooking
+Wolverhampton Wanderers:Bull,Mutch,Richards,Dougan,Jiménez,Jota
+Birmingham City:Francis,Latchford,Furlong,Bellingham,Dugarry
+Blackburn Rovers:Shearer,Sutton,Ripley,Duff,Gallacher
+Bristol City:Atyeo,Tinnion,Murray,Weimann
+Charlton Athletic:Mendonca,Kinsella,Rufus,Bartlett,Leaburn
+Coventry City:Dublin,Regis,Speedie,Houchen,Whelan,Gyökeres
+Derby County:Hector,Gemmill,McFarland,Wanchope,Sturridge
+Hull City:Windass,Bowen,Wagstaff,Fryatt,Livermore
+Ipswich Town:Mariner,Wark,Mühren,Brazil,Scowcroft,Chaplin
+Leicester City:Lineker,Vardy,Heskey,Mahrez,Claridge,Weller
+Middlesbrough:Juninho,Ravanelli,Clough,Slaven,Mowbray,Downing
+Millwall:Cascarino,Sheringham,Harris,Morison
+Norwich City:Fleck,Sutton,Pukki,Goss,Huckerby,Holt
+Oxford United:Aldridge,Saunders,Houghton,Hebberd,Constable
+Portsmouth:Whittingham,Kanu,Defoe,Crouch
+Preston North End:Finney,Nugent,Cresswell,Healy
+Queens Park Rangers:Bowles,Marsh,Ferdinand,Sinclair,Taarabt,Francis
+Sheffield United:Deane,Currie,Sharp,Agana
+Sheffield Wednesday:Hirst,Waddle,Sheridan,Di Canio,Carbone,Bright
+Southampton:Le Tissier,Keegan,Shearer,Channon,Beattie,Lambert,Ward-Prowse
+Stoke City:Matthews,Crouch,Fuller,Shawcross,Greenhoff
+Watford:Blissett,Barnes,Deeney,Helguson
+West Bromwich Albion:Regis,Astle,Brown,Cunningham,Robson,Phillips
+AFC Wimbledon:Pigott,Akinfenwa
+Barnsley:Hendrie,Redfearn,Fjørtoft,Butterfield,Woodrow
+Blackpool:Matthews,Mortensen,Adam,Ormerod,Ball
+Bolton Wanderers:Lofthouse,Okocha,Davies,Anelka,Nolan
+Bradford City:McCall,Windass,Beagrie,Campbell
+Doncaster Rovers:Coppinger,Sharp,Hayter
+Huddersfield Town:Law,Booth,Mooy,Rhodes
+Leyton Orient:Cunningham
+Luton Town:Stein,Harford,Adebayo
+Peterborough United:Mackail-Smith,Toney,Clarke-Harris
+Plymouth Argyle:Mariner
+Port Vale:Foyle
+Reading:Kitson,Doyle,Hunt,Sidwell,Senior
+Stockport County:Francis
+Wigan Athletic:Roberts,Camara,Watson
+Wycombe Wanderers:Akinfenwa
+Bristol Rovers:Stewart,Cureton,Lambert
+Tranmere Rovers:Aldridge,Nevin
+Cambridge United:Dublin
+Crewe Alexandra:Platt,Ashton,Jones,Johnson
+Notts County:Lawton
+Shrewsbury Town:Rowley
+Fleetwood Town:Vardy
+Chesterfield:Davies
+Oldham Athletic:Ritchie
+Celtic:Larsson,Dalglish,McNeill,Johnstone,McStay,Sutton,Nakamura,McGrain
+Rangers:McCoist,Laudrup,Gascoigne,Baxter,Greig,Durrant,Morelos,Tavernier
+Aberdeen:Miller,McLeish,Strachan,Black,McGinn,Archibald
+Heart of Midlothian:Robertson,Mackay,Skácel,Colquhoun,Shankland
+Hibernian:Smith,Reilly,Riordan,Griffiths
+Dundee United:Sturrock,Narey,Malpas,Hegarty
+Dundee:Gilzean,Caballero
+Kilmarnock:Boyd
+Motherwell:McFadden,Higdon
+St Mirren:McGarvey
+Falkirk:Latapy
+St Johnstone:May
+Raith Rovers:Dalziel
+Albion Rovers:Stein,Green
+Swansea City:Curtis,Latchford,Michu,Sigurdsson,Routledge,Britton
+Wrexham:Mullin,Palmer,Thomas
+Cardiff City:Earnshaw,Bellamy,Whittingham
+Hereford:Radford,George
+Sutton United:Rains,Hanlan
+Chester:Rush
+Southend United:Collymore
+Carlisle United:Beardsley
+Hartlepool United:Allon
+Real Madrid:Di Stéfano,Puskás,Butragueño,Raúl,Zidane,Ronaldo,Benzema,Vinícius,Bellingham,Hugo Sánchez
+Barcelona:Cruyff,Maradona,Romário,Ronaldinho,Messi,Stoichkov,Xavi,Lineker
+Atlético Madrid:Torres,Griezmann,Agüero,Forlán,Futre
+Sevilla:Šuker,Kanouté,Luís Fabiano,Navas,Maradona
+Valencia:Kempes,Mendieta,Villa,Aimar,Silva
+Athletic Club:Zarra,Aduriz,Williams,Guerrero,Muniain
+Real Sociedad:Kovačević,Nihat,Oyarzabal,Alonso
+Bayern Munich:Müller,Beckenbauer,Rummenigge,Lewandowski,Robben,Ribéry,Kane,Matthäus
+Borussia Dortmund:Möller,Chapuisat,Riedle,Lewandowski,Reus,Haaland,Sammer
+Bayer Leverkusen:Kirsten,Ballack,Wirtz,Kießling
+Schalke 04:Fischer,Raúl,Huntelaar,Sand
+Hamburger SV:Keegan,Hrubesch,Seeler,Magath
+Borussia Mönchengladbach:Netzer,Heynckes,Simonsen,Vogts
+Juventus:Platini,Baggio,Del Piero,Rossi,Charles,Zidane,Trezeguet,Vialli
+AC Milan:van Basten,Gullit,Rijkaard,Shevchenko,Weah,Kaká,Maldini,Rivera
+Inter:Mazzola,Matthäus,Klinsmann,Ronaldo,Vieri,Milito,Lautaro
+Roma:Totti,Batistuta,Falcão,Völler,De Rossi,Pruzzo
+Lazio:Signori,Chinaglia,Gascoigne,Immobile,Klose,Crespo
+Napoli:Maradona,Careca,Cavani,Higuaín,Hamšík,Mertens,Osimhen
+Fiorentina:Batistuta,Baggio,Toni,Hamrin,Rui Costa
+Parma:Crespo,Zola,Asprilla,Brolin,Chiesa
+Sampdoria:Vialli,Mancini,Gullit,Platt,Lombardo
+Paris Saint-Germain:Weah,Ginola,Raí,Ibrahimović,Cavani,Mbappé,Ronaldinho
+Marseille:Papin,Waddle,Boli,Völler,Drogba,Cantona
+Lyon:Juninho,Benzema,Lacazette,Govou
+Monaco:Weah,Hoddle,Henry,Trezeguet,Falcao,Mbappé
+Saint-Étienne:Rocheteau,Platini,Aubameyang
+Ajax:Cruyff,van Basten,Bergkamp,Kluivert,Litmanen,Suárez
+PSV Eindhoven:Romário,Ronaldo,van Nistelrooy,Gullit,Kežman
+Feyenoord:van Hanegem,Kuyt,van Persie,Gullit
+Benfica:Eusébio,Águas,Rui Costa,Nuno Gomes,Cardozo,Di María
+Porto:Gomes,Madjer,Jardel,Deco,Falcao
+Sporting CP:Jardel,Figo,Ronaldo,Gyökeres
+Galatasaray:Hakan Şükür,Hagi,Drogba,Sneijder,Icardi
+Fenerbahçe:Alex,Tanju,Džeko
+Anderlecht:Rensenbrink,Scifo,Lukaku
+Club Brugge:Ceulemans
+Red Star Belgrade:Savićević,Pančev,Prosinečki,Stojković
+Dinamo Zagreb:Šuker,Boban,Modrić,Olmo
+Olympiacos:Rivaldo,Giovanni
+Panathinaikos:Saravakos,Warzycha
+FC Copenhagen:Cornelius
+Rosenborg:Brattbakk,Carew
+Sparta Prague:Nedvěd,Rosický
+Steaua Bucharest:Hagi,Lăcătuș,Pițurcă
+Dynamo Kyiv:Blokhin,Shevchenko,Rebrov,Belanov
+Basel:Streller,Salah,Frei
+IFK Göteborg:Corneliusson,Blomqvist
+Boca Juniors:Maradona,Riquelme,Palermo,Tevez,Batistuta
+River Plate:Di Stéfano,Francescoli,Crespo,Ortega,Saviola,Aimar
+Flamengo:Zico,Romário,Adriano,Júnior,Bebeto
+Santos:Pelé,Coutinho,Neymar,Robinho
+Corinthians:Sócrates,Rivelino,Tevez,Ronaldo
+Palmeiras:Ademir da Guia,Rivaldo,Evair,Edmundo,Endrick
+São Paulo:Raí,Müller,Kaká,Luís Fabiano,Careca
+Club América:Zague,Blanco,Cabañas
+Peñarol:Spencer,Morena,Schiaffino
+Nacional:Suárez,Recoba
+LA Galaxy:Beckham,Donovan,Keane,Ibrahimović
+Inter Miami:Messi,Suárez,Busquets,Alba
+Al Ahly:Aboutrika,Hossam Hassan
+Al Hilal:Neymar,Mitrović,Al-Jaber
+Kashima Antlers:Zico
+Melbourne Victory:Thompson,Honda

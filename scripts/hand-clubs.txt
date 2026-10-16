@@ -1,0 +1,266 @@
+# packet eng | England | The English clubs of the 92, Premier League down to League Two
+1|Arsenal|the Emirates
+1|Aston Villa|Villa Park
+1|Bournemouth|Dean Court
+1|Brentford|the Gtech Community Stadium
+1|Brighton & Hove Albion|the Amex
+1|Burnley|Turf Moor
+1|Chelsea|Stamford Bridge
+1|Crystal Palace|Selhurst Park
+1|Everton|the Hill Dickinson Stadium
+1|Fulham|Craven Cottage
+1|Leeds United|Elland Road
+1|Liverpool|Anfield
+1|Manchester City|the Etihad
+1|Manchester United|Old Trafford
+1|Newcastle United|St James' Park
+1|Nottingham Forest|the City Ground
+1|Sunderland|the Stadium of Light
+1|Tottenham Hotspur|the Tottenham Hotspur Stadium
+1|West Ham United|the London Stadium
+1|Wolverhampton Wanderers|Molineux
+2|Birmingham City|St Andrew's
+2|Blackburn Rovers|Ewood Park
+2|Bristol City|Ashton Gate
+2|Charlton Athletic|The Valley
+2|Coventry City|the Coventry Building Society Arena
+2|Derby County|Pride Park
+2|Hull City|the MKM Stadium
+2|Ipswich Town|Portman Road
+2|Leicester City|the King Power Stadium
+2|Middlesbrough|the Riverside
+2|Millwall|The Den
+2|Norwich City|Carrow Road
+2|Oxford United|the Kassam Stadium
+2|Portsmouth|Fratton Park
+2|Preston North End|Deepdale
+2|Queens Park Rangers|Loftus Road
+2|Sheffield United|Bramall Lane
+2|Sheffield Wednesday|Hillsborough
+2|Southampton|St Mary's
+2|Stoke City|the bet365 Stadium
+2|Watford|Vicarage Road
+2|West Bromwich Albion|The Hawthorns
+3|AFC Wimbledon|Plough Lane
+3|Barnsley|Oakwell
+3|Blackpool|Bloomfield Road
+3|Bolton Wanderers|the Toughsheet Stadium
+3|Bradford City|Valley Parade
+3|Burton Albion|the Pirelli Stadium
+3|Doncaster Rovers|the Eco-Power Stadium
+3|Exeter City|St James Park
+3|Huddersfield Town|the John Smith's Stadium
+3|Leyton Orient|Brisbane Road
+3|Lincoln City|Sincil Bank
+3|Luton Town|Kenilworth Road
+3|Mansfield Town|Field Mill
+3|Northampton Town|Sixfields
+3|Peterborough United|London Road
+3|Plymouth Argyle|Home Park
+3|Port Vale|Vale Park
+3|Reading|the Madejski Stadium
+3|Rotherham United|the New York Stadium
+3|Stevenage|Broadhall Way
+3|Stockport County|Edgeley Park
+3|Wigan Athletic|the DW Stadium
+3|Wycombe Wanderers|Adams Park
+4|Accrington Stanley|the Crown Ground
+4|Barnet|The Hive
+4|Barrow|Holker Street
+4|Bristol Rovers|the Memorial Stadium
+4|Bromley|Hayes Lane
+4|Cambridge United|the Abbey Stadium
+4|Cheltenham Town|Whaddon Road
+4|Chesterfield|the SMH Group Stadium
+4|Colchester United|the Colchester Community Stadium
+4|Crawley Town|the Broadfield Stadium
+4|Crewe Alexandra|Gresty Road
+4|Fleetwood Town|Highbury Stadium
+4|Gillingham|Priestfield
+4|Grimsby Town|Blundell Park
+4|Harrogate Town|Wetherby Road
+4|MK Dons|Stadium MK
+4|Notts County|Meadow Lane
+4|Oldham Athletic|Boundary Park
+4|Salford City|Moor Lane
+4|Shrewsbury Town|the New Meadow
+4|Swindon Town|the County Ground
+4|Tranmere Rovers|Prenton Park
+4|Walsall|the Bescot Stadium
+
+# packet sco | Scotland | The SPFL and a few old favourites from further down
+1|Celtic|Celtic Park
+1|Rangers|Ibrox
+2|Aberdeen|Pittodrie
+2|Heart of Midlothian|Tynecastle
+2|Hibernian|Easter Road
+2|Dundee United|Tannadice
+2|Dundee|Dens Park
+2|Kilmarnock|Rugby Park
+2|Motherwell|Fir Park
+2|St Mirren|St Mirren Park
+2|Falkirk|the Falkirk Stadium
+2|Livingston|Almondvale
+3|St Johnstone|McDiarmid Park
+3|Ross County|Victoria Park
+3|Partick Thistle|Firhill
+3|Raith Rovers|Stark's Park
+3|Dunfermline Athletic|East End Park
+3|Ayr United|Somerset Park
+3|Greenock Morton|Cappielow
+3|Airdrieonians|the Excelsior Stadium
+3|Queen's Park|Lesser Hampden
+3|Arbroath|Gayfield Park
+3|Inverness Caledonian Thistle|the Caledonian Stadium
+3|Hamilton Academical|New Douglas Park
+3|Queen of the South|Palmerston Park
+4|Alloa Athletic|Recreation Park
+4|Cove Rangers|Balmoral Stadium
+4|East Fife|Bayview
+4|Kelty Hearts|New Central Park
+4|Montrose|Links Park
+4|Peterhead|Balmoor
+4|Stenhousemuir|Ochilview
+4|Stirling Albion|Forthbank
+4|Annan Athletic|Galabank
+4|Clyde|Broadwood
+4|Dumbarton|the Rock
+4|East Kilbride|K-Park
+4|Edinburgh City|Meadowbank
+4|Elgin City|Borough Briggs
+4|Forfar Athletic|Station Park
+4|Stranraer|Stair Park
+4|The Spartans|Ainslie Park
+4|Bonnyrigg Rose|New Dundas Park
+5|Albion Rovers|Cliftonhill
+5|Brechin City|Glebe Park
+5|Berwick Rangers|Shielfield Park
+5|Cowdenbeath|Central Park
+5|Clydebank|Holm Park
+5|Gretna 2008|Raydale Park
+5|Buckie Thistle|Victoria Park
+5|Brora Rangers|Dudgeon Park
+
+# packet wal | Wales | The Welsh clubs in the English league, plus the Cymru Premier
+2|Swansea City|the Swansea.com Stadium
+2|Wrexham|the Racecourse Ground
+3|Cardiff City|the Cardiff City Stadium
+4|Newport County|Rodney Parade
+5|The New Saints|Park Hall
+5|Connah's Quay Nomads|the Deeside Stadium
+5|Bala Town|Maes Tegid
+5|Caernarfon Town|The Oval
+5|Penybont|Bryntirion Park
+5|Barry Town United|Jenner Park
+5|Haverfordwest County|Bridge Meadow
+5|Colwyn Bay|Llanelian Road
+5|Flint Town United|Cae-y-Castell
+5|Aberystwyth Town|Park Avenue
+5|Cardiff Met|Cyncoed
+5|Llanelli Town|Stebonheath Park
+5|Newtown|Latham Park
+5|Briton Ferry Llansawel|Old Road
+5|Airbus UK Broughton|The Airfield
+5|Carmarthen Town|Richmond Park
+5|Merthyr Town|Penydarren Park
+5|Rhyl 1879|Belle Vue
+5|Bangor 1876|
+5|Pontypridd United|
+
+# packet nl | English non-league | Old Football League names and proper non-league romance
+5|Yeovil Town|Huish Park
+5|Hartlepool United|Victoria Park
+5|Southend United|Roots Hall
+5|York City|Bootham Crescent
+5|Rochdale|Spotland
+5|Scunthorpe United|Glanford Park
+5|Carlisle United|Brunton Park
+5|Aldershot Town|the Recreation Ground
+5|Altrincham|Moss Lane
+5|Boreham Wood|Meadow Park
+5|Eastleigh|the Silverlake Stadium
+5|Ebbsfleet United|Stonebridge Road
+5|FC Halifax Town|The Shay
+5|Forest Green Rovers|The New Lawn
+5|Gateshead|the International Stadium
+5|Morecambe|the Globe Arena
+5|Solihull Moors|Damson Park
+5|Sutton United|Gander Green Lane
+5|Tamworth|The Lamb
+5|Woking|Kingfield
+5|Wealdstone|Grosvenor Vale
+5|Southport|Haig Avenue
+5|Hereford|Edgar Street
+5|Kidderminster Harriers|Aggborough
+5|Chester|the Deva Stadium
+5|Darlington|Blackwell Meadows
+5|Dagenham & Redbridge|Victoria Road
+5|Torquay United|Plainmoor
+5|Maidstone United|the Gallagher Stadium
+5|Scarborough Athletic|
+5|Macclesfield|Moss Rose
+5|Boston United|York Street
+5|Bury|Gigg Lane
+5|Kettering Town|
+5|Welling United|Park View Road
+5|Dover Athletic|the Crabble
+5|Nuneaton Borough|
+5|Hednesford Town|Keys Park
+5|Bath City|Twerton Park
+5|Weymouth|the Bob Lucas Stadium
+5|Gainsborough Trinity|the Northolme
+5|Blyth Spartans|Croft Park
+5|Whitby Town|the Turnbull Ground
+5|Spennymoor Town|the Brewery Field
+5|Marine|Rossett Park
+5|Chorley|Victory Park
+5|Truro City|
+5|Worthing|Woodside Road
+5|Dorking Wanderers|Meadowbank
+5|Dulwich Hamlet|Champion Hill
+5|Corinthian-Casuals|King George's Field
+5|AFC Fylde|Mill Farm
+5|Billericay Town|New Lodge
+5|Braintree Town|Cressing Road
+5|King's Lynn Town|The Walks
+5|AFC Telford United|the New Bucks Head
+5|Stafford Rangers|Marston Road
+5|Northwich Victoria|
+5|Slough Town|Arbour Park
+5|Sheffield FC|
+5|Enfield Town|
+
+# packet ire | Ireland, north & south | The Irish League and the League of Ireland
+5|Linfield|Windsor Park
+5|Glentoran|The Oval
+5|Crusaders|Seaview
+5|Cliftonville|Solitude
+5|Larne|Inver Park
+5|Coleraine|the Showgrounds
+5|Glenavon|Mourneview Park
+5|Portadown|Shamrock Park
+5|Ballymena United|the Showgrounds
+5|Dungannon Swifts|Stangmore Park
+5|Carrick Rangers|Taylors Avenue
+5|Loughgall|Lakeview Park
+4|Shamrock Rovers|Tallaght Stadium
+4|Bohemians|Dalymount Park
+4|Shelbourne|Tolka Park
+4|St Patrick's Athletic|Richmond Park
+4|Derry City|the Brandywell
+4|Dundalk|Oriel Park
+4|Cork City|Turner's Cross
+4|Sligo Rovers|The Showgrounds
+5|Drogheda United|
+5|Galway United|Eamonn Deacy Park
+5|Waterford|the RSC
+5|Finn Harps|Finn Park
+5|Bray Wanderers|the Carlisle Grounds
+
+# packet euro | Rest of Europe | (extra slips for clubs the data doesn't cover)
+3|Slovan Bratislava|Tehelné pole
+4|Sabah|Bank Respublika Arena
+3|Ferencváros|Groupama Aréna
+4|Ludogorets|Huvepharma Arena
+4|Maccabi Tel Aviv|Bloomfield Stadium
+4|Qarabağ|the Tofiq Bahramov Stadium

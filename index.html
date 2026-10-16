@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Mug Cup</title>
+<meta name="description" content="Write the slips, fold them into the mug, roll the dice. Dice football the way it was played on the bedroom floor: cups, seasons, giant-killings and a notebook full of results.">
+<meta name="theme-color" content="#4e6377">
+<meta property="og:title" content="The Mug Cup">
+<meta property="og:description" content="Dice football, the way it was played on the bedroom floor.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=IM+Fell+English:ital@0;1&family=Patrick+Hand&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="floor" aria-hidden="true">
+  <!-- things left lying on the carpet -->
+  <svg class="thing felt red" viewBox="0 0 200 30"><rect x="20" y="6" width="150" height="18" rx="9" fill="#d9534a"/><rect x="150" y="4" width="40" height="22" rx="8" fill="#a83a32"/><path d="M20 10L4 15l16 5z" fill="#3b2d22"/><rect x="60" y="6" width="6" height="18" fill="#fff" opacity=".4"/></svg>
+  <svg class="thing felt blue" viewBox="0 0 200 30"><rect x="20" y="6" width="150" height="18" rx="9" fill="#3f7cac"/><rect x="150" y="4" width="40" height="22" rx="8" fill="#2b5878"/><path d="M20 10L4 15l16 5z" fill="#1d2f44"/><rect x="60" y="6" width="6" height="18" fill="#fff" opacity=".4"/></svg>
+  <svg class="thing die1" viewBox="0 0 60 60"><rect x="4" y="4" width="52" height="52" rx="12" fill="#fffaf0" stroke="#3b2d22" stroke-width="3"/><circle cx="18" cy="18" r="5" fill="#3b2d22"/><circle cx="42" cy="42" r="5" fill="#3b2d22"/><circle cx="30" cy="30" r="5" fill="#3b2d22"/></svg>
+  <svg class="thing sticker" viewBox="0 0 90 110"><rect x="4" y="4" width="82" height="102" rx="6" fill="#fff" stroke="#c9bca0" stroke-width="2"/><rect x="12" y="12" width="66" height="62" fill="#bcd3e6"/><circle cx="45" cy="38" r="14" fill="#f3d2b3"/><path d="M22 74c4-16 42-16 46 0" fill="#d9534a"/><rect x="12" y="80" width="66" height="18" fill="#f3e9d2"/><path d="M20 89h50" stroke="#3b2d22" stroke-width="2"/></svg>
+  <svg class="thing slipA" viewBox="0 0 120 50"><path d="M4 8l112-4-2 40-110 2z" fill="#fff4c4" stroke="#d6c69a"/><path d="M14 30c10-6 20 4 30-2s18 4 28-1 16 3 26-1" fill="none" stroke="#2b3d6d" stroke-width="2.5" stroke-linecap="round"/></svg>
+  <svg class="thing slipB" viewBox="0 0 120 50"><path d="M6 4l110 6-4 38-108-4z" fill="#fde0d8" stroke="#dcb3a8"/><path d="M16 26c8 4 18-4 28 0s22-2 30 2 16-3 24 0" fill="none" stroke="#2b3d6d" stroke-width="2.5" stroke-linecap="round"/></svg>
+</div>
+
+<header class="cover">
+  <div class="label">
+    <p class="label-line"><span>Subject:</span> dice football</p>
+    <h1>The Mug Cup</h1>
+    <p class="label-line"><span>Name:</span> <em>the way it was played on the bedroom floor</em></p>
+  </div>
+</header>
+
+<div class="book-wrap">
+  <nav class="tabs" id="tabs" aria-label="Sections of the book"></nav>
+  <main class="page" id="main"><p class="sub" style="padding:40px 0">Getting the slips out…</p></main>
+  <div id="doodles"></div>
+</div>
+<footer>Slips, a mug, two dice and a lot of imagination.</footer>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
