@@ -40,7 +40,8 @@ export async function drawPage(spec) {
   const nextRule = y => RULE0 + Math.ceil((y - RULE0) / STEP) * STEP;   // baselines sit just above a ruled line
   let y = y0 + 72;
   ctx.textBaseline = 'alphabetic';
-  if (spec.kicker) { ctx.fillStyle = '#b73e36'; ctx.font = '700 40px Caveat, cursive'; ctx.fillText(spec.kicker, L, y); }
+  let kickEnd = L, bigEnd = null;
+  if (spec.kicker) { ctx.fillStyle = '#b73e36'; ctx.font = '700 40px Caveat, cursive'; ctx.fillText(spec.kicker, L, y); kickEnd = L + ctx.measureText(spec.kicker).width; }
   y = RULE0 + STEP - 6;
   ctx.fillStyle = '#5b4632'; ctx.font = '400 62px "IM Fell English", Georgia, serif';
   wrap(ctx, spec.title, maxW).forEach(l => { ctx.fillText(l, L, y); y += STEP * 1.5; });
@@ -48,24 +49,55 @@ export async function drawPage(spec) {
   if (spec.big) {
     y = nextRule(y + STEP) - 8;
     ctx.fillStyle = '#2b3d6d'; ctx.font = '700 92px Caveat, cursive';
-    wrap(ctx, spec.big, maxW).forEach(l => { ctx.fillText(l, L, y); y += STEP * 2; });
+    const bl = wrap(ctx, spec.big, maxW);
+    bl.forEach((l, k) => { ctx.fillText(l, L, y); if (k === bl.length - 1) bigEnd = { x: L + ctx.measureText(l).width, y }; y += STEP * 2; });
+  }
+  // Decide where the stamp goes before writing the lines, so they can leave room for it.
+  let stampAt = null, limit = y0 + ph - 130;
+  const hardLimit = y0 + ph - 130;
+  if (spec.stamp) {
+    ctx.font = '400 44px "IM Fell English", Georgia, serif';
+    const w = Math.max(220, ctx.measureText(spec.stamp).width + 50);
+    if (bigEnd && R - bigEnd.x >= w + 50) stampAt = { x: Math.min(R - w / 2, bigEnd.x + 40 + w / 2), y: bigEnd.y - 30, w };
+    else if (R - kickEnd >= w + 40) stampAt = { x: R - w / 2 - 6, y: y0 + 62, w };
+    else { stampAt = { x: R - w / 2 - 6, y: y0 + ph - 150, w }; limit = y0 + ph - 230; }
   }
   y = nextRule(y) - 9;
-  for (const raw of spec.lines || []) {
-    const ln = typeof raw === 'string' ? { text: raw } : raw;
-    const style = ln.style || 'body';
-    if (style === 'head') y += STEP;
-    if (y > y0 + ph - 130) break;
-    ctx.font = style === 'head' ? '400 40px "IM Fell English", Georgia, serif' : style === 'small' ? '400 30px "Patrick Hand", cursive' : style === 'red' ? '700 42px Caveat, cursive' : '400 34px "Patrick Hand", cursive';
-    ctx.fillStyle = style === 'head' ? '#5b4632' : style === 'small' ? '#7a6f5f' : style === 'red' ? '#b73e36' : '#2b3d6d';
-    wrap(ctx, ln.text, maxW).forEach(l => { if (y <= y0 + ph - 130) ctx.fillText(l, L, y); y += STEP; });
+  // Fit the lines to the page: drop the earliest "drop" lines first, never leave a heading on its own.
+  const FONT = { head: '400 40px "IM Fell English", Georgia, serif', small: '400 30px "Patrick Hand", cursive', red: '700 42px Caveat, cursive', body: '400 34px "Patrick Hand", cursive' };
+  const COLOUR = { head: '#5b4632', small: '#7a6f5f', red: '#b73e36', body: '#2b3d6d' };
+  let lines = (spec.lines || []).map(raw => (typeof raw === 'string' ? { text: raw } : { ...raw }));
+  const rowsOf = ln => { ctx.font = FONT[ln.style || 'body']; return wrap(ctx, ln.text, maxW).length + (ln.style === 'head' ? 1 : 0); };
+  const rowsLeft = Math.floor((limit - y) / STEP) + 1;
+  let dropped = 0;
+  while (lines.reduce((n, ln) => n + rowsOf(ln), 0) > rowsLeft) {
+    // lowest drop number goes first (shocks are 1, early rounds 2); a heading left with nothing under it goes too
+    let k = -1;
+    lines.forEach((ln, i) => { if (ln.drop && (k < 0 || ln.drop < lines[k].drop)) k = i; });
+    if (k < 0) break;
+    if (lines[k].drop === 2) dropped++;
+    lines.splice(k, 1);
+    lines = lines.filter((ln, i) => !(ln.style === 'head' && (!lines[i + 1] || lines[i + 1].style === 'head')));
   }
+  if (dropped) { const k = lines.findIndex(ln => ln.drop === 2); if (k >= 0 && lines.reduce((n, ln) => n + rowsOf(ln), 0) < rowsLeft) lines.splice(k, 0, { text: `…and ${dropped} earlier round${dropped === 1 ? '' : 's'}`, style: 'small' }); }
+  lines.forEach((ln, idx) => {
+    const style = ln.style || 'body';
+    if (style === 'head') {
+      y += STEP;
+      const next = lines[idx + 1];
+      if (!next || y + STEP > hardLimit) { y = hardLimit + STEP; return; }   // no room for what follows: skip the heading
+    }
+    if (y > hardLimit) return;
+    ctx.font = FONT[style]; ctx.fillStyle = COLOUR[style];
+    // Below the reserved line, only write if the words stop short of the stamp.
+    wrap(ctx, ln.text, maxW).forEach(l => { if (y <= limit || (y <= hardLimit && L + ctx.measureText(l).width < stampAt.x - stampAt.w / 2 - 20)) ctx.fillText(l, L, y); y += STEP; });
+  });
   ctx.fillStyle = '#7a6f5f'; ctx.font = '700 32px Caveat, cursive';
   ctx.fillText('The Mug Cup · dice football from the bedroom floor', L, y0 + ph - 34);
   if (spec.stamp) {
-    ctx.save(); ctx.translate(R - 150, y0 + ph - 150); ctx.rotate(-0.16);
+    const { x: sx, y: sy, w } = stampAt;
+    ctx.save(); ctx.translate(sx, sy); ctx.rotate(-0.12);
     ctx.font = '400 44px "IM Fell English", Georgia, serif';
-    const w = Math.max(220, ctx.measureText(spec.stamp).width + 50);
     ctx.globalAlpha = 0.85; ctx.strokeStyle = '#b73e36'; ctx.lineWidth = 5; ctx.strokeRect(-w / 2, -44, w, 88);
     ctx.fillStyle = '#b73e36'; ctx.textAlign = 'center'; ctx.fillText(spec.stamp, 0, 15);
     ctx.restore();

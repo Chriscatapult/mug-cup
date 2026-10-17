@@ -141,12 +141,24 @@ export function winnersHTML(c, opts = {}) {
 }
 // The page you can save or send.
 export function cupPageSpec(c, kicker) {
+  // One line per tie: two legs become an aggregate, replays mention the first game.
   const route = [];
-  c.stages.forEach(st => { if (st && st.type === 'ko') st.rounds.forEach(r => r.ties.forEach(t => { if (t.h === c.champion || t.a === c.champion) t.matches.filter(m => m.done).forEach(m => route.push({ text: `${r.name.replace(/^The /, '')}: ${nameOf(m.h)} ${m.hs}–${m.as} ${nameOf(m.a)}${m.x.length ? ' (extra dice)' : m.pk ? ` (${m.pk.s} on pens)` : ''}` })); })); });
+  c.stages.forEach(st => { if (st && st.type === 'ko') st.rounds.forEach(r => r.ties.forEach(t => {
+    if (t.h !== c.champion && t.a !== c.champion) return;
+    const ms = t.matches.filter(m => m.done); if (!ms.length) return;
+    const last = ms[ms.length - 1], round = r.name.replace(/^The /, ''), me = c.champion;
+    const opp = nameOf(t.h === me ? t.a : t.h), mine = m => (m.h === me ? [m.hs, m.as] : [m.as, m.hs]);
+    let f = 0, a = 0;
+    if (r.legs === 2) ms.forEach(m => { const [x, y] = mine(m); f += x; a += y; }); else [f, a] = mine(last);
+    const agg = r.legs === 2 && ms.length === 2 ? ' on aggregate' : '';
+    const how = t.mark === '*' ? ', then won on extra dice' : t.mark === 'a' ? ', through on away goals' : t.mark === 'p' && last.pk ? `, then won ${last.pk.s} on pens` : '';
+    const replay = r.legs === 1 && ms.length === 2 ? ' in a replay' : '';
+    route.push({ drop: 2, text: f === a ? `${round}: drew ${f}–${a} with ${opp}${agg}${how}` : `${round}: beat ${opp} ${f}–${a}${agg}${replay}${how}` });
+  })); });
   const gb = goldenBoot(C.allMatches(c), 3);
-  const lines = [{ text: c.finalText || '', style: 'red' }, { text: 'The road to the trophy', style: 'head' }, ...route.slice(-9)];
-  if (gb.length) lines.push({ text: 'Top scorers', style: 'head' }, { text: gb.map(g => `${g.p} (${nameOf(g.t)}) ${g.n}`).join(', ') });
+  const lines = [{ text: `${c.finalText || ''}${c.finalVenue_ ? `, at ${c.finalVenue_}` : ''}`, style: 'red' }, { text: 'The road to the trophy', style: 'head' }, ...route.slice(-8).map((x, k, arr) => (k === arr.length - 1 ? { text: x.text } : x))];
+  if (gb.length) lines.push({ text: 'The golden boot', style: 'head' }, { text: gb.slice(0, 2).map(g => `${g.p} (${nameOf(g.t)}) ${g.n}`).join(', ') });
   const shocks = c.notes.slice().sort((a, b) => b.gap - a.gap).slice(0, 2);
-  if (shocks.length) lines.push({ text: 'Shocks', style: 'head' }, ...shocks.map(s => ({ text: `${s.text} ${s.score}`, style: 'small' })));
+  if (shocks.length) lines.push({ text: 'Shocks', style: 'head' }, ...shocks.map(s => ({ text: `${s.text} ${s.score}`, style: 'small', drop: 1 })));
   return { kicker: kicker || `${c.size} teams · ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`, title: `Winners of ${c.name}`, big: nameOf(c.champion), lines, stamp: team(c.champion).t >= 4 ? 'GIANT KILLERS' : 'CHAMPIONS' };
 }
