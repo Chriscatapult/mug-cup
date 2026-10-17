@@ -30,6 +30,7 @@ function knock(t, g) { nz(t, 0.035, 'bandpass', 2200 + Math.random() * 2800, 4, 
 
 export const SND = {
   unlock() { ac(); },
+  tick() { if (!ok()) return; const t = ctx.currentTime; nz(t, 0.025, 'bandpass', 5200, 6, 0.035); },
   rattle() { if (!ok()) return; const t = ctx.currentTime; knock(t, 0.06); knock(t + 0.03 + Math.random() * 0.02, 0.045); },
   // dice on carpet: softer and duller than on a table
   clatter() { if (!ok()) return; let t = ctx.currentTime + 0.01, gap = 0.07, g = 0.24; for (let k = 0; k < 6; k++) { knock(t, g); t += gap * (0.7 + Math.random() * 0.6); gap *= 1.25; g *= 0.68; } nz(ctx.currentTime, 0.25, 'lowpass', 500, 0.7, 0.05, 0.02); },

@@ -7,6 +7,7 @@ import { cap, plural } from '../engine/util.js';
 import * as C from '../engine/competition.js';
 import { recordMatch } from '../engine/almanac.js';
 import { pickFeatured, isFollowedMatch } from './play.js';
+import { expanded } from '../engine/rules.js';
 
 const nm = id => esc(nameOf(id));
 export const stagePrefix = c => c.cfg.stages.length > 1 ? `${C.stageName(c, c.stageIdx)}: ` : '';
@@ -93,7 +94,8 @@ export function compHead(c, prefix = '') {
   } else {
     const r = C.curRound(c);
     head = stagePrefix(c) + r.name + (r.sit > 0 ? (r.legs === 2 ? ', second legs' : ', replays') : r.legs === 2 ? ', first legs' : '');
-    const lvl = r.legs === 2 ? (r.level === 'away' ? 'Level on aggregate? Away goals, then extra dice.' : 'Level on aggregate? Extra dice.') : r.level === 'replay' && r.sit === 0 ? 'Level? A replay at the other ground.' : 'Level? Extra dice until someone blinks.';
+    const tb = expanded() ? 'penalties' : 'extra dice';
+    const lvl = r.legs === 2 ? (r.level === 'away' ? `Level on aggregate? Away goals, then ${tb}.` : `Level on aggregate? ${expanded() ? 'Penalties' : 'Extra dice'}.`) : r.level === 'replay' && r.sit === 0 ? 'Level? A replay at the other ground.' : expanded() ? 'Level? One roll on the penalty card.' : 'Level? Extra dice until someone blinks.';
     sub = (r.neutral ? `One tie, at ${C.venueOf(c, r.ties[0].matches[0] || r.ties[0], r)}. ` : `${plural(items.length, 'tie')}${r.byes.length && r.sit === 0 ? `, ${plural(r.byes.length, 'team')} through on byes` : ''}. `) + lvl;
   }
   return `${prefix ? `<p class="kicker">${esc(prefix)}</p>` : ''}<h2 class="round-title">${esc(cap(head))}</h2><p class="sub">${esc(sub)}</p>`;

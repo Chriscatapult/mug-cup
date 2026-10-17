@@ -10,6 +10,7 @@ const DEFAULTS = {
   name: 'The Great Mug Cup', pools: ['pl', 'efl', 'sco', 'wal', 'big5'], off: [], custom: [], size: 64,
   preset: 'mug', stages: clone(PRESETS[0].stages), speed: 'slow', sound: true, shortcuts: false, squads: {}, follow: [],
   sName: 'The Mug League', sRegions: 16, sSeeded: false, sPools: null,
+  dice: 'classic', card: 'high', form: false, customCard: null, customPens: null,
 };
 export const app = {
   S: store.settings.load(DEFAULTS),

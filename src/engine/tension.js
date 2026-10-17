@@ -1,6 +1,7 @@
 // The line that appears after the first die lands: what the second die needs to do.
 import { nameOf } from './env.js';
-import { goals, facePhrase } from './util.js';
+import { facePhrase } from './util.js';
+import { scoreOf, sides, expanded, R, classicEdge } from './rules.js';
 import { tieOutcomes } from './competition.js';
 import { leagueTable, position, zoneOf } from './league.js';
 
@@ -11,8 +12,8 @@ function group(outcomes) {
 }
 // For a plain match: faces that win, draw or lose for the away side.
 export function plainOutcomes(m) {
-  const out = {}, h = goals(m.fh);
-  for (let f = 1; f <= 6; f++) { const a = goals(f); out[f] = a > h ? 'win' : a < h ? 'lose' : 'level'; }
+  const out = {};
+  for (let f = 1; f <= sides(); f++) { const [h, a] = scoreOf(m, f); out[f] = a > h ? 'win' : a < h ? 'lose' : 'level'; }
   return out;
 }
 const cap1 = s => s.charAt(0).toUpperCase() + s.slice(1);
@@ -23,14 +24,14 @@ export function needsLine(item, ctx = {}) {
   const away = nameOf(m.a);
   const outcomes = item.t ? tieOutcomes(item.t, item.r, m) : plainOutcomes(m);
   const g = group(outcomes);
-  if (g.win && g.win.length === 6) return `${away} can't lose now.`;
-  if (g.lose && g.lose.length === 6) return `It's over for ${away}. Nothing can save them.`;
+  if (g.win && g.win.length === sides()) return `${away} can't lose now.`;
+  if (g.lose && g.lose.length === sides()) return `It's over for ${away}. Nothing can save them.`;
   const knock = !!item.t && m.kind !== 'leg1';
   const VERB = {
     win: who => knock ? `${who} are through` : `${who} win it`,
     lose: who => knock ? `${who} are out` : `${who} lose`,
     level: () => m.kind === 'leg1' ? "it's level going into the second leg" : "it's a draw",
-    extra: () => "it's extra dice", replay: () => "it's a replay",
+    extra: () => expanded() ? "it's penalties" : "it's extra dice", replay: () => "it's a replay",
     ahead: who => `${who} take a lead into the second leg`,
     behind: who => `${who} go into the second leg behind`,
   };
@@ -40,9 +41,11 @@ export function needsLine(item, ctx = {}) {
     const who = named ? 'they' : away;
     const v = VERB[o](who);
     if (v.includes(away)) named = true;
-    return `${cap1(facePhrase(g[o]))} and ${v}.`;
+    return `${cap1(facePhrase(g[o], sides()))} and ${v}.`;
   });
   let line = bits.join(' ');
+  const edge = classicEdge(m, 'a');
+  if (edge) line = `${away} throw two dice and keep the ${edge > 0 ? 'better' : 'worse'} one. ` + line;
   if (ctx.league && ctx.zones) line += zoneHint(item, ctx, g);
   return line;
 }
@@ -69,4 +72,12 @@ function zoneHint(item, ctx, g) {
   }
   const hints = [...byMsg].map(([msg, rs]) => `${cap1(rs.join(' or '))} ${msg}, for now.`);
   return hints.length ? ' ' + hints.join(' ') : '';
+}
+
+// Before the penalty die: who wins on which numbers.
+export function pensLine(m) {
+  const pens = R().pens, H = [], A = [];
+  pens.forEach((e, k) => (e[0] === 'h' ? H : A).push(k + 1));
+  const bit = (faces, id) => faces.length ? `${cap1(facePhrase(faces, 10))} and ${nameOf(id)} win it.` : '';
+  return `Penalties! One roll on the penalty card. ${[bit(H, m.h), bit(A, m.a)].filter(Boolean).join(' ')}`;
 }

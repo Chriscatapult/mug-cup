@@ -2,6 +2,7 @@
 // replays, away goals, late entrants. Used for cup mode and for every cup inside a season.
 import { tierOf, nameOf, groundOf } from './env.js';
 import { newMatch, setScores } from './match.js';
+import { sides } from './rules.js';
 import { pow2floor, groupSizes, nameSeq, gName, clone, cap, plural, rand } from './util.js';
 
 export const V = 4;
@@ -198,7 +199,10 @@ export function tieStatus(t, r) {
   const ms = t.matches, m0 = ms[0];
   if (!m0 || m0.hs === null) return 'open';
   const win = (id, mark) => { t.w = id; t.mark = mark; return 'done'; };
-  const xres = m => { const l = m.x[m.x.length - 1]; if (!l || l[0] === l[1]) return 'extra'; return win(l[0] > l[1] ? m.h : m.a, '*'); };
+  const xres = m => {
+    if (m.pk) return win(m.pk.w === 'h' ? m.h : m.a, 'p');
+    const l = m.x[m.x.length - 1]; if (!l || l[0] === l[1]) return 'extra'; return win(l[0] > l[1] ? m.h : m.a, '*');
+  };
   if (r.legs === 2) {
     const m1 = ms[1];
     if (!m1) return m0.done ? 'leg2' : 'open';
@@ -217,7 +221,7 @@ export function tieStatus(t, r) {
 // What happens to the tie for each face the away die might show (given the home die is thrown).
 export function tieOutcomes(t, r, m) {
   const out = {};
-  for (let f = 1; f <= 6; f++) {
+  for (let f = 1; f <= sides(); f++) {
     const save = { fa: m.fa, hs: m.hs, as: m.as, w: t.w, mark: t.mark };
     m.fa = f; setScores(m);
     const s = tieStatus(t, r);
@@ -304,7 +308,8 @@ function crown(c, id, runner, tb) {
   const t = r && r.ties.find(x => x.w === id);
   if (t) {
     c.finalVenue_ = venueOf(c, t.matches[0], r);
-    c.finalText = t.matches.map(m => `${nameOf(m.h)} ${m.hs}–${m.as} ${nameOf(m.a)}`).join(', then ') + (t.mark === '*' ? ' (extra dice)' : t.mark === 'a' ? ' (away goals)' : '');
+    const last = t.matches[t.matches.length - 1];
+    c.finalText = t.matches.map(m => `${nameOf(m.h)} ${m.hs}–${m.as} ${nameOf(m.a)}`).join(', then ') + (t.mark === '*' ? ' (extra dice)' : t.mark === 'a' ? ' (away goals)' : t.mark === 'p' && last.pk ? ` (${nameOf(t.w)} win ${last.pk.s} on penalties)` : '');
   } else c.finalText = `${nameOf(id)} were the last team standing`;
 }
 export function allMatches(c) {

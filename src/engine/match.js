@@ -1,11 +1,12 @@
 // A single match: the dice, the scorers, and the line in the notebook about it.
 import { env, team, nameOf, groundOf, seeded } from './env.js';
 import { goals, pick, shuffle, rand, ordinal } from './util.js';
+import { scoreOf } from './rules.js';
 
 export function newMatch(h, a, kind = 'single', sit = 0) {
   return { h, a, kind, sit, fh: 0, fa: 0, hs: null, as: null, x: [], xf: [], gh: [], ga: [], done: false };
 }
-export function setScores(m) { m.hs = goals(m.fh); m.as = goals(m.fa); }
+export function setScores(m) { const sc = scoreOf(m); m.hs = sc[0]; m.as = sc[1]; }
 
 /* ---------- team sheets ---------- */
 const SURNAMES = {
@@ -90,8 +91,9 @@ export function makeReport(m, ctx) {
     `A hat-trick for ${hat[0]}, who takes the match ball home under his arm.`,
     `${hat[0]} helps himself to three. He'll be telling the grandkids about this one.`]));
   if (lines.length < 2) {
-    const extra = m.x && m.x.length;
-    if (hs === 0 && as === 0 && !extra) lines.push(pick(['A proper nil-nil. Rain, mud and not much else.', 'Goalless. The dog would have enjoyed it more.', 'Both keepers could have brought a deckchair.']));
+    const extra = (m.x && m.x.length) || m.pk;
+    if (m.pk && W) lines.push(pick([`Nothing to split them, so it went to penalties. ${W.n} win ${m.pk.s} in the shootout.`, `Penalties. ${W.n} hold their nerve and win ${m.pk.s}.`, `It took a shootout, and ${W.n} won it ${m.pk.s}.`]));
+    else if (hs === 0 && as === 0 && !extra) lines.push(pick(['A proper nil-nil. Rain, mud and not much else.', 'Goalless. The dog would have enjoyed it more.', 'Both keepers could have brought a deckchair.']));
     else if (extra && W) lines.push(pick([`Nothing to split them, so it went to the extra dice. ${W.n} held their nerve.`, `Level at the end, and ${W.n} come through on the extra dice. Hearts in mouths all round.`]));
     else if (W && Math.abs(hs - as) >= 4) lines.push(pick([`${W.n} ran riot. ${L.n} will want to burn the video.`, `A hammering. ${L.n}'s keeper won't sleep tonight.`]));
     else if (hs + as >= 8) lines.push(pick([`${hs + as} goals. Absolute bedlam.`, `Defending was optional. ${hs + as} goals and everyone's hoarse.`]));

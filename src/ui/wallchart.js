@@ -5,7 +5,7 @@ import { plural } from '../engine/util.js';
 
 function wcTie(t) {
   const hw = t[4] === 0, aw = t[4] === 1, sc = v => v === null || v === undefined ? '' : v;
-  const mk = m => m === '*' ? '*' : m === 'a' ? ' (a)' : m === 'r' ? ' (r)' : '';
+  const mk = m => m === '*' ? '*' : m === 'a' ? ' (a)' : m === 'r' ? ' (r)' : m === 'p' ? ' (p)' : '';
   return `<div class="wc-tie"><div class="r ${hw ? 'w' : aw ? 'l' : ''}"><span>${esc(t[0])}</span><b>${sc(t[2])}${hw ? mk(t[5]) : ''}</b></div><div class="r ${aw ? 'w' : hw ? 'l' : ''}"><span>${esc(t[1])}</span><b>${sc(t[3])}${aw ? mk(t[5]) : ''}</b></div></div>`;
 }
 function wcEmpty(k) {
@@ -29,7 +29,7 @@ export function wallchartHTML(s, sub) {
   });
   cols += `<div class="wc-col"><h4>Winners</h4><div class="wc-body"><div class="wc-champ">${TROPHY}<p>${s.champ ? esc(s.champ) : '?'}</p></div></div></div>`;
   return posterHTML('The wallchart', sub || s.name, `<div class="wc-scroll"><div class="wc-cols">${cols}</div></div>`,
-    'Highlighted names went through. * extra dice, (a) away goals, (r) after a replay. Each round is a fresh draw from the mug, so it fills in as you go.');
+    'Highlighted names went through. * extra dice, (p) penalties, (a) away goals, (r) after a replay. Each round is a fresh draw from the mug, so it fills in as you go.');
 }
 // A season "wallchart": the four shelves of a region, side by side.
 export function ladderHTML(title, sub, shelves) {

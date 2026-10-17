@@ -2,7 +2,7 @@
 import { nameOf } from './env.js';
 import { isOG } from './match.js';
 
-export const newAlmanac = () => ({ v: 2, tours: 0, seasons: 0, matches: 0, goals: 0, dice: [0, 0, 0, 0, 0, 0], scores: {}, clubs: {}, players: {}, h2h: {} });
+export const newAlmanac = () => ({ v: 2, tours: 0, seasons: 0, matches: 0, goals: 0, dice: [0, 0, 0, 0, 0, 0], dice10: Array(10).fill(0), pens: 0, scores: {}, clubs: {}, players: {}, h2h: {} });
 
 export function club(H, id) {
   return H.clubs[id] || (H.clubs[id] = { p: 0, w: 0, d: 0, l: 0, f: 0, a: 0, t: 0, fin: 0, tours: 0, rolls: 0, faces: 0, last: [], big: null, titles: [], up: 0, down: 0 });
@@ -18,8 +18,14 @@ export const careerGoals = (H, player, clubId) => H.players[player + '|' + clubI
 export function recordMatch(H, m) {
   const hn = nameOf(m.h), an = nameOf(m.a), hc = club(H, m.h), ac = club(H, m.a);
   H.matches++; H.goals += m.hs + m.as;
-  H.dice[m.fh - 1]++; H.dice[m.fa - 1]++;
-  hc.rolls++; hc.faces += m.fh; ac.rolls++; ac.faces += m.fa;
+  if (m.d10) {
+    if (!H.dice10) H.dice10 = Array(10).fill(0);
+    H.dice10[m.fh - 1]++; H.dice10[m.fa - 1]++;
+  } else {
+    H.dice[m.fh - 1]++; H.dice[m.fa - 1]++;
+    hc.rolls++; hc.faces += m.fh; ac.rolls++; ac.faces += m.fa;
+  }
+  if (m.pk) { H.pens = (H.pens || 0) + 1; }
   (m.xf || []).forEach(([a, b]) => { H.dice[a - 1]++; H.dice[b - 1]++; hc.rolls++; hc.faces += a; ac.rolls++; ac.faces += b; });
   const sk = Math.max(m.hs, m.as) + '–' + Math.min(m.hs, m.as);
   H.scores[sk] = (H.scores[sk] || 0) + 1;

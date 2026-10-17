@@ -17,14 +17,23 @@ export const gName = i => i < 26 ? String.fromCharCode(65 + i) : String.fromChar
 export const groupSizes = (n, G) => Array.from({ length: G }, (_, i) => Math.floor(n / G) + (i < n % G ? 1 : 0));
 export const WORDS = ['One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve'];
 
-// "a 4 or 5", "a 1, 2 or 6", "anything but a 6"
-export function facePhrase(faces) {
-  const f = [...faces].sort((a, b) => a - b);
+// "a 4 or 5", "a 7 or higher", "a 3 to 6", "anything but a 6"
+export function facePhrase(faces, max = 6) {
+  return facePhrase_(faces, max).replace(/\ba (8|11|18)\b/g, 'an $1');
+}
+function facePhrase_(faces, max) {
+  const f = [...new Set(faces)].sort((a, b) => a - b);
   if (!f.length) return '';
-  if (f.length === 6) return 'anything';
-  if (f.length === 5) return `anything but a ${[1, 2, 3, 4, 5, 6].find(x => !f.includes(x))}`;
-  if (f.length === 1) return `a ${f[0]}`;
-  return `a ${f.slice(0, -1).join(', ')} or ${f[f.length - 1]}`;
+  if (f.length === max) return 'anything';
+  if (f.length === max - 1) return `anything but a ${Array.from({ length: max }, (_, i) => i + 1).find(x => !f.includes(x))}`;
+  const runs = [];
+  f.forEach(x => { const r = runs[runs.length - 1]; if (r && x === r[1] + 1) r[1] = x; else runs.push([x, x]); });
+  if (runs.length === 1 && runs[0][1] - runs[0][0] >= 2) {
+    const [lo, hi] = runs[0];
+    return hi === max ? `a ${lo} or higher` : lo === 1 ? `a ${hi} or lower` : `a ${lo} to ${hi}`;
+  }
+  const parts = runs.flatMap(([lo, hi]) => hi - lo >= 2 ? [`${lo} to ${hi}`] : lo === hi ? [String(lo)] : [String(lo), String(hi)]);
+  return parts.length === 1 ? `a ${parts[0]}` : `a ${parts.slice(0, -1).join(', ')} or ${parts[parts.length - 1]}`;
 }
 
 // Knockout round names, counting down from the size of the round.

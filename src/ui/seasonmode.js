@@ -12,6 +12,8 @@ import * as C from '../engine/competition.js';
 import * as SE from '../engine/season.js';
 import { leagueTable } from '../engine/league.js';
 import { recordMatch, recordTrophy, recordMove, goldenBoot } from '../engine/almanac.js';
+import { makeRules, expanded } from '../engine/rules.js';
+import { rulesPickerHTML } from './rulespick.js';
 
 const nm = id => esc(nameOf(id));
 const s_ = () => app.season;
@@ -31,7 +33,8 @@ export function seasonSetupHTML() {
   h += `<h2 class="step"><span class="num">3</span>How are they shared out?</h2><div class="choices">
     <button class="choice${!app.S.sSeeded ? ' on' : ''}" data-act="sseeded" data-v="0"><strong>Totally random</strong><span>Real Madrid could start Under the Bed. Albion Rovers could start on the Top Shelf. Anything goes.</span></button>
     <button class="choice${app.S.sSeeded ? ' on' : ''}" data-act="sseeded" data-v="1"><strong>Big clubs on the top shelf</strong><span>Four pots by size. The giants start at the top and the minnows at the bottom, then it's up to the dice.</span></button></div>`;
-  h += `<h2 class="step"><span class="num">4</span>Write out the slips</h2><p class="note">You need at least ${need} slips. If there are more, ${need} come out of the mug and the rest stay in.</p>${packetsHTML('sPools')}`;
+  h += `<h2 class="step"><span class="num">4</span>How are the dice rolled?</h2>${rulesPickerHTML()}`;
+  h += `<h2 class="step"><span class="num">5</span>Write out the slips</h2><p class="note">You need at least ${need} slips. If there are more, ${need} come out of the mug and the rest stay in.</p>${packetsHTML('sPools')}`;
   h += `<div class="start-bar"><p>${plural(n, 'slip')} written. ${n >= need ? `${need} will come out of the mug.` : `That's ${need - n} short.`}</p>
     <button class="btn big red" data-act="startseason" ${n >= need ? '' : 'disabled'}>Into the mug with them</button></div>`;
   if (app.season) h += `<p class="note" style="margin-top:10px">Starting a new season world throws away the one you've got.</p>`;
@@ -39,7 +42,9 @@ export function seasonSetupHTML() {
 }
 export function startSeasonDraw() {
   const ids = available(app.S.sPools).map(t => t.id);
+  const rules = makeRules(app.S);
   app.season = SE.createSeasonDraw({ teamIds: ids, regions: app.S.sRegions, seeded: app.S.sSeeded, name: app.S.sName.trim() || 'The Mug League' });
+  app.season.rules = rules;
   app.active = 'season'; saveSeason();
 }
 
@@ -209,12 +214,12 @@ function cupSession(render) {
     ctx: it => compCtx(it.c, it),
     mine: it => it.m.h === s.my || it.m.a === s.my,
     onComplete: onMatch, save: () => saveSeason(),
-    headHTML: () => { const r = C.curRound(rg.cup); return `<p class="kicker">${esc(s.name)} ${label()} · ${esc(SE.stepTitle(s))}</p><h2 class="round-title">${esc(rg.cup.name)}: ${esc(r.name.replace(/^The /, 'the '))}</h2><p class="sub">${r.final ? `The final, at ${esc(C.venueOf(rg.cup, r.ties[0].matches[0], r))}. The other regions play their finals tonight too.` : `Every club in ${esc(rg.name)}, Top Shelf to Under the Bed. Level? Extra dice. The other ${s.regionCount - 1} regional cups are being played tonight as well.`}</p>${calendarHTML()}`; },
+    headHTML: () => { const r = C.curRound(rg.cup); return `<p class="kicker">${esc(s.name)} ${label()} · ${esc(SE.stepTitle(s))}</p><h2 class="round-title">${esc(rg.cup.name)}: ${esc(r.name.replace(/^The /, 'the '))}</h2><p class="sub">${r.final ? `The final, at ${esc(C.venueOf(rg.cup, r.ties[0].matches[0], r))}. The other regions play their finals tonight too.` : `Every club in ${esc(rg.name)}, Top Shelf to Under the Bed. Level? ${expanded() ? 'Penalties.' : 'Extra dice.'} The other ${s.regionCount - 1} regional cups are being played tonight as well.`}</p>${calendarHTML()}`; },
     elsewhere(vis) {
       const all = items(), set = new Set(vis), hidden = all.filter((it, i) => !set.has(i));
       if (hidden.some(it => !it.m.done)) return `${plural(hidden.length, 'other cup tie', 'other cup ties')} in the other regions.`;
       const finals = hidden.filter(it => it.r && it.r.final);
-      if (finals.length) return `<b>The other regional finals:</b><ul class="results">${finals.map(it => `<li>${esc(it.c.name)}: ${nm(it.m.h)}<span class="sc2">${it.m.hs}–${it.m.as}</span>${nm(it.m.a)} <span class="xs">${nm(it.t.w)} win it${it.t.mark === '*' ? ' on extra dice' : ''}</span></li>`).join('')}</ul>`;
+      if (finals.length) return `<b>The other regional finals:</b><ul class="results">${finals.map(it => `<li>${esc(it.c.name)}: ${nm(it.m.h)}<span class="sc2">${it.m.hs}–${it.m.as}</span>${nm(it.m.a)} <span class="xs">${nm(it.t.w)} win it${it.t.mark === '*' ? ' on extra dice' : it.t.mark === 'p' ? ' on penalties' : ''}</span></li>`).join('')}</ul>`;
       const shocks = hidden.filter(it => it.m.shock).slice(0, 6);
       return `<b>Elsewhere:</b> ${plural(hidden.length, 'tie')} played.${shocks.length ? ` Giant-killings: ${shocks.map(it => `${nm(it.t.w)} knock out ${nm(it.t.w === it.t.h ? it.t.a : it.t.h)} <span class="xs">(${esc(it.c.name.replace(/^The /, ''))})</span>`).join('; ')}.` : ''}`;
     },
@@ -320,7 +325,7 @@ export function seasonBookHTML(r) {
     h += `<div class="book-sec"><h3>${esc(rg.cup.name)}</h3>${cr.slice().reverse().map(round => {
       const res = round.ties.filter(t => t.matches.some(m => m.done));
       if (!res.length) return '';
-      return `<h4 class="glabel">${esc(round.name)}</h4><ul class="results">${res.map(t => { const m = t.matches[t.matches.length - 1]; return `<li class="${m.shock ? 'shock' : ''}">${nm(m.h)}<span class="sc2">${m.hs}–${m.as}</span>${nm(m.a)}${m.x.length ? ' <span class="xs">(extra dice)</span>' : ''}</li>`; }).join('')}</ul>`;
+      return `<h4 class="glabel">${esc(round.name)}</h4><ul class="results">${res.map(t => { const m = t.matches[t.matches.length - 1]; return `<li class="${m.shock ? 'shock' : ''}">${nm(m.h)}<span class="sc2">${m.hs}–${m.as}</span>${nm(m.a)}${m.x.length ? ' <span class="xs">(extra dice)</span>' : m.pk ? ` <span class="xs">(${esc(m.pk.s)} on pens)</span>` : ''}</li>`; }).join('')}</ul>`;
     }).join('')}</div>`;
   }
   Object.keys(SE.WORLD).forEach(k => {

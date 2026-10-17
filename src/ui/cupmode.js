@@ -9,6 +9,8 @@ import { plural, cap, ordinal, shuffle, clone } from '../engine/util.js';
 import * as C from '../engine/competition.js';
 import { PRESETS, QUICK_CORE, QUICK_SIZE, QUICK_STAGES } from '../engine/presets.js';
 import { recordTrophy, recordTour, goldenBoot, club } from '../engine/almanac.js';
+import { makeRules, rulesName } from '../engine/rules.js';
+import { rulesPickerHTML } from './rulespick.js';
 
 const nm = id => esc(nameOf(id));
 
@@ -17,13 +19,16 @@ export function quickDraw() {
   const all = allTeams().map(t => t.id), have = new Set(app.data.teams.map(t => t.id));
   const core = QUICK_CORE.filter(id => have.has(id));
   const rest = shuffle(all.filter(id => !core.includes(id))).slice(0, QUICK_SIZE - core.length);
+  const rules = makeRules(app.S);
   app.cup = C.createCompetition({ name: 'The Quick Draw', stages: QUICK_STAGES, size: QUICK_SIZE, teamIds: [...core, ...rest] });
-  app.cup.quick = true;
+  app.cup.quick = true; app.cup.rules = rules;
   app.active = 'cup'; saveCup();
 }
 export function startCup() {
   const teams = available();
+  const rules = makeRules(app.S);
   app.cup = C.createCompetition({ name: (app.S.name || 'The Mug Cup').trim(), stages: app.S.stages, size: app.S.size, teamIds: teams.map(t => t.id) });
+  app.cup.rules = rules;
   app.active = 'cup'; saveCup();
 }
 
@@ -67,7 +72,8 @@ export function cupSetupHTML() {
   else h += `<p style="margin-top:14px"><button class="btn ghost small" data-act="customise">Change it in the designer</button></p>`;
   h += `<div class="flow">${plan.lines.map(l => `<p>${esc(l)}</p>`).join('')}${plan.matches ? `<p class="flow-total">About ${plural(Math.round(plan.matches), 'match', 'matches')}${plan.replays ? ', plus replays' : ''}. ${verdict(plan.matches)}</p>` : ''}${plan.errors.map(e => `<p class="warn">${esc(e)}</p>`).join('')}</div>`;
   const sizeOK = s => s === 'all' || s <= n;
-  h += `<h2 class="step"><span class="num">4</span>How many come out of the mug?</h2><p class="note">Everyone goes in. Only this many get drawn out.</p>
+  h += `<h2 class="step"><span class="num">4</span>How are the dice rolled?</h2>${rulesPickerHTML()}`;
+  h += `<h2 class="step"><span class="num">5</span>How many come out of the mug?</h2><p class="note">Everyone goes in. Only this many get drawn out.</p>
     <div class="chips">${[8, 16, 20, 32, 64, 128, 256, 512, 'all'].map(s => `<button class="chip${app.S.size === s ? ' on' : ''}" data-act="size" data-v="${s}" ${sizeOK(s) ? '' : 'disabled'}>${s === 'all' ? 'Everyone (' + n + ')' : s}</button>`).join('')}
     <label class="any-n">or exactly <input id="sizeIn" type="number" min="2" max="${n}" value="${app.S.size === 'all' ? '' : app.S.size}" aria-label="Number of teams"></label></div>`;
   const ok = !plan.errors.length;
@@ -100,7 +106,7 @@ function crownCup() {
   c.celebrated = true;
 }
 function routeFor(c, id) {
-  const out = [], nmf = m => `${nm(m.h)}<span class="sc2">${m.hs}–${m.as}</span>${nm(m.a)}${m.x.length ? ` <span class="xs">(extra dice ${m.x.map(p => p[0] + '–' + p[1]).join(', ')})</span>` : ''}`;
+  const out = [], nmf = m => `${nm(m.h)}<span class="sc2">${m.hs}–${m.as}</span>${nm(m.a)}${m.x.length ? ` <span class="xs">(extra dice ${m.x.map(p => p[0] + '–' + p[1]).join(', ')})</span>` : m.pk ? ` <span class="xs">(${nm(m.pk.w === 'h' ? m.h : m.a)} won ${m.pk.s} on penalties)</span>` : ''}`;
   c.stages.forEach(st => {
     if (!st) return;
     if (st.type === 'groups') st.groups.forEach(g => g.matches.forEach(m => { if (m.done && (m.h === id || m.a === id)) out.push(`<li><span class="xs">${esc(g.name === 'The League' ? 'League' : 'Group ' + g.name)}:</span> ${nmf(m)}</li>`); }));
@@ -136,7 +142,7 @@ export function winnersHTML(c, opts = {}) {
 // The page you can save or send.
 export function cupPageSpec(c, kicker) {
   const route = [];
-  c.stages.forEach(st => { if (st && st.type === 'ko') st.rounds.forEach(r => r.ties.forEach(t => { if (t.h === c.champion || t.a === c.champion) t.matches.filter(m => m.done).forEach(m => route.push({ text: `${r.name.replace(/^The /, '')}: ${nameOf(m.h)} ${m.hs}–${m.as} ${nameOf(m.a)}${m.x.length ? ' (extra dice)' : ''}` })); })); });
+  c.stages.forEach(st => { if (st && st.type === 'ko') st.rounds.forEach(r => r.ties.forEach(t => { if (t.h === c.champion || t.a === c.champion) t.matches.filter(m => m.done).forEach(m => route.push({ text: `${r.name.replace(/^The /, '')}: ${nameOf(m.h)} ${m.hs}–${m.as} ${nameOf(m.a)}${m.x.length ? ' (extra dice)' : m.pk ? ` (${m.pk.s} on pens)` : ''}` })); })); });
   const gb = goldenBoot(C.allMatches(c), 3);
   const lines = [{ text: c.finalText || '', style: 'red' }, { text: 'The road to the trophy', style: 'head' }, ...route.slice(-9)];
   if (gb.length) lines.push({ text: 'Top scorers', style: 'head' }, { text: gb.map(g => `${g.p} (${nameOf(g.t)}) ${g.n}`).join(', ') });

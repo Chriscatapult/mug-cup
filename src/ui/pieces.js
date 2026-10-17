@@ -7,18 +7,35 @@ const PIPS = { 0: [], 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2
 export function pipsHTML(face) { const on = PIPS[face || 0]; let h = ''; for (let i = 0; i < 9; i++) h += `<span class="pip${on.includes(i) ? ' on' : ''}"></span>`; return h; }
 export const dieHTML = (cls, face) => `<div class="die ${cls}${face ? '' : ' blank'}" data-face="${face || 0}" aria-hidden="true">${pipsHTML(face)}</div>`;
 export const grabDieHTML = (cls, kind, i, label) => `<div class="die ${cls} blank grab" data-grab="${kind}" data-i="${i}" role="button" tabindex="0" aria-label="${esc(label)}">${pipsHTML(0)}</div>`;
-export function setFace(el, face) {
+// A ten-sided die, drawn as the kite-shaped face you see from above. cls: 'h' (red), 'a' (blue) or 'pen' (green).
+const KITE = '<svg viewBox="0 0 44 48" aria-hidden="true"><path class="k-out" d="M22 2L42 19L22 46L2 19Z"/><path class="k-face" d="M22 3L11 21L22 31L33 21Z"/><path class="k-line" d="M2 19L11 21M42 19L33 21M22 31V46"/></svg>';
+export const d10HTML = (cls, face) => `<div class="die d10 ${cls}${face ? '' : ' blank'}" data-face="${face || 0}" aria-hidden="true">${KITE}<span class="num">${face || ''}</span></div>`;
+export const grabD10HTML = (cls, kind, i, label) => `<div class="die d10 ${cls} blank grab" data-grab="${kind}" data-i="${i}" role="button" tabindex="0" aria-label="${esc(label)}">${KITE}<span class="num"></span></div>`;
+export const waitD10HTML = cls => `<div class="die d10 ${cls} blank wait" aria-hidden="true">${KITE}<span class="num"></span></div>`;
+// The form die: a homemade six-sided die with stickers on. faces: what each side is worth.
+export const fdieHTML = (label, grab, i) => grab
+  ? `<div class="die fdie blank grab" data-grab="f" data-i="${i}" role="button" tabindex="0" aria-label="Throw the form die"><span class="num">?</span></div>`
+  : `<div class="die fdie" aria-hidden="true"><span class="num">${esc(label)}</span></div>`;
+export function setFace(el, face, label) {
   el.dataset.face = face; el.classList.remove('blank');
+  const num = el.querySelector('.num');
+  if (num) { num.textContent = label ? label(face) : face; return; }
   const on = PIPS[face];
   el.querySelectorAll('.pip').forEach((p, i) => p.classList.toggle('on', on.includes(i)));
 }
-export async function rollDie(el, face, ms) {
+// opts: { sides, label(face) for the sticker die, onFace(face, landed) to follow the tumble }
+export async function rollDie(el, face, ms, opts = {}) {
   if (!el) return;
-  el.classList.remove('blank', 'landed', 'grab', 'next', 'shaking'); el.classList.add('rolling');
+  const n = opts.sides || 6;
+  el.classList.remove('blank', 'landed', 'grab', 'next', 'shaking', 'wait'); el.classList.add('rolling');
   el.removeAttribute('data-grab'); el.removeAttribute('tabindex'); el.removeAttribute('role');
-  const t0 = performance.now(); let step = 55;
-  while (performance.now() - t0 < ms) { setFace(el, d6()); await sleep(step); step *= 1.1; }
-  setFace(el, face);
+  const t0 = performance.now(); let step = 55, last = 0;
+  while (performance.now() - t0 < ms) {
+    let f = 1 + Math.floor(Math.random() * n); if (f === last && n > 1) f = f % n + 1;
+    last = f; setFace(el, f, opts.label); if (opts.onFace) opts.onFace(f, false);
+    await sleep(step); step *= 1.1;
+  }
+  setFace(el, face, opts.label); if (opts.onFace) opts.onFace(face, true);
   el.classList.remove('rolling'); void el.offsetWidth; el.classList.add('landed');
 }
 

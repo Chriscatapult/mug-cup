@@ -9,6 +9,8 @@ import { plural, ordinal } from '../engine/util.js';
 import * as C from '../engine/competition.js';
 import * as SE from '../engine/season.js';
 import { sheetFor } from '../engine/match.js';
+import { rulesName } from '../engine/rules.js';
+import { rulesPickerHTML, cardEditorHTML } from './rulespick.js';
 
 const nm = id => esc(nameOf(id));
 
@@ -25,7 +27,7 @@ export function homeHTML() {
     </div>
     ${carry}
     <div class="modes">
-      <div class="mode-card quick"><h3>Quick draw</h3><p>Sixty-four slips: this season's Champions League sides, Celtic and Rangers, and 26 more from anywhere at all. Straight knockout.</p><button class="btn big red" data-act="quick">Tip them in</button></div>
+      <div class="mode-card quick"><h3>Quick draw</h3><p>Sixty-four slips: this season's Champions League sides, Celtic and Rangers, and 26 more from anywhere at all. Straight knockout.</p><p class="xs">Dice: ${esc(rulesName({ dice: app.S.dice, mode: app.S.card, form: app.S.form }))}. <button class="linkish" data-act="go" data-v="drawer">Change</button></p><button class="btn big red" data-act="quick">Tip them in</button></div>
       <div class="mode-card"><h3>A cup</h3><p>Pick the slips, pick the format. Ready-made cups, or design your own monster stage by stage.</p><button class="btn big" data-act="go" data-v="cupsetup">Build a cup</button></div>
       <div class="mode-card"><h3>A season</h3><p>Every club into made-up regions, four shelves deep. Promotion, relegation, regional cups and a summer of world tournaments. Then do it all again.</p><button class="btn big" data-act="go" data-v="seasonsetup">Start a season</button></div>
     </div>
@@ -56,7 +58,7 @@ export function bookHTML(which) {
   return switcher + (show === 'season' ? seasonBookHTML(bookRegion) : cupBookHTML());
 }
 function resultLine(m) {
-  return `${nm(m.h)}<span class="sc2">${m.hs}–${m.as}</span>${nm(m.a)}${m.x && m.x.length ? ` <span class="xs">(extra dice ${m.x.map(p => p[0] + '–' + p[1]).join(', ')})</span>` : ''}`;
+  return `${nm(m.h)}<span class="sc2">${m.hs}–${m.as}</span>${nm(m.a)}${m.x && m.x.length ? ` <span class="xs">(extra dice ${m.x.map(p => p[0] + '–' + p[1]).join(', ')})</span>` : m.pk ? ` <span class="xs">(${nm(m.pk.w === 'h' ? m.h : m.a)} won ${m.pk.s} on penalties)</span>` : ''}`;
 }
 function scorersInline(m) {
   const s = l => (l || []).map(g => esc(g.p) + ' ' + g.m + "'").join(', ');
@@ -89,7 +91,7 @@ function cupBookHTML() {
         const played = t.matches.filter(m => m.done);
         if (!played.length) return `<li class="muted">${nm(t.h)} v ${nm(t.a)} <span class="xs">still to be rolled</span></li>`;
         const lines = played.map(m => `${m.kind === 'leg2' ? '<span class="xs">2nd leg:</span> ' : m.kind === 'replay' ? '<span class="xs">Replay:</span> ' : m.kind === 'leg1' ? '<span class="xs">1st leg:</span> ' : ''}${resultLine(m)}${scorersInline(m)}`).join('<br>');
-        const out = t.w && played.length === t.matches.length && C.tieStatus(t, r) === 'done' ? ` <span class="xs">${nm(t.w)} through${t.mark === 'a' ? ' on away goals' : t.mark === '*' ? ' on extra dice' : ''}</span>` : '';
+        const out = t.w && played.length === t.matches.length && C.tieStatus(t, r) === 'done' ? ` <span class="xs">${nm(t.w)} through${t.mark === 'a' ? ' on away goals' : t.mark === '*' ? ' on extra dice' : t.mark === 'p' ? ' on penalties' : ''}</span>` : '';
         return `<li class="${played.some(m => m.shock) ? 'shock' : ''}">${lines}${out}</li>`;
       }).join('')}</ul>${r.byes.length ? `<p class="byes">Byes: ${r.byes.map(nm).join(', ')}.</p>` : ''}</div>`;
     });
@@ -104,18 +106,19 @@ function cupBookHTML() {
 /* ---------- the almanac ---------- */
 let almSort = 't', almClub = null;
 export const setAlm = (sort, clubId) => { if (sort) almSort = sort; if (clubId !== undefined) almClub = clubId; };
-function diceChart(H) {
-  const d = H.dice, total = d.reduce((a, b) => a + b, 0) || 1, mx = Math.max(...d, 1), exp = total / 6;
-  const bw = 40, gap = 14, x0 = 70;
+// counts: how often each face came up. nil: the face to colour pink (the classic six).
+function diceChart(counts, nil) {
+  const n = counts.length, total = counts.reduce((a, b) => a + b, 0) || 1, mx = Math.max(...counts, 1), exp = total / n;
+  const W = 400, x0 = 60, span = W - x0 - 10, bw = Math.min(40, span / n - 8), gap = span / n - bw;
   let bars = '';
-  d.forEach((c, i) => {
+  counts.forEach((c, i) => {
     const h = c / mx * 120, x = x0 + i * (bw + gap), y = 140 - h;
-    bars += `<rect x="${x}" y="${y}" width="${bw}" height="${h}" fill="${i === 5 ? '#f2b8ae' : '#bcd3e6'}" stroke="#3b2d22" stroke-width="1.5" rx="2"/>
-      <text x="${x + bw / 2}" y="${y - 6}" text-anchor="middle" font-size="13" fill="#2b3d6d">${(c / total * 100).toFixed(1)}%</text>
+    bars += `<rect x="${x}" y="${y}" width="${bw}" height="${h}" fill="${i === nil ? '#f2b8ae' : n === 10 ? '#f4c6c0' : '#bcd3e6'}" stroke="#3b2d22" stroke-width="1.5" rx="2"/>
+      <text x="${x + bw / 2}" y="${y - 6}" text-anchor="middle" font-size="${n === 10 ? 10 : 13}" fill="#2b3d6d">${(c / total * 100).toFixed(n === 10 ? 0 : 1)}%</text>
       <text x="${x + bw / 2}" y="158" text-anchor="middle" font-size="15" fill="#3b2d22">${i + 1}</text>`;
   });
   const ey = 140 - exp / mx * 120;
-  return `<svg class="dice-chart" viewBox="0 0 400 170" role="img" aria-label="How often each face has come up">${bars}<line x1="14" x2="394" y1="${ey}" y2="${ey}" stroke="#b73e36" stroke-width="1.5" stroke-dasharray="5 4"/><text x="16" y="${ey - 5}" font-size="12" fill="#b73e36">fair share</text></svg>`;
+  return `<svg class="dice-chart" viewBox="0 0 ${W} 170" role="img" aria-label="How often each face has come up">${bars}<line x1="14" x2="${W - 6}" y1="${ey}" y2="${ey}" stroke="#b73e36" stroke-width="1.5" stroke-dasharray="5 4"/><text x="16" y="${ey - 5}" font-size="12" fill="#b73e36">fair share</text></svg>`;
 }
 function clubCardHTML(H) {
   if (!almClub) return '';
@@ -140,8 +143,9 @@ export function almanacHTML() {
   const H = app.H;
   const honours = honoursHTML();
   if (!H.matches) return `<div class="empty-state"><h2 class="round-title">The almanac</h2><p class="sub">Every match you roll goes into the record books: every club's wins and losses, every scorer's tally, every head-to-head, and how the dice have really been behaving.</p></div>${honours}`;
-  const rolls = H.dice.reduce((a, b) => a + b, 0);
-  const avgFace = H.dice.reduce((s, c, i) => s + c * (i + 1), 0) / rolls;
+  const rolls = H.dice.reduce((a, b) => a + b, 0), d10 = H.dice10 || [], rolls10 = d10.reduce((a, b) => a + b, 0);
+  const avgFace = rolls ? H.dice.reduce((s, c, i) => s + c * (i + 1), 0) / rolls : 0;
+  const avg10 = rolls10 ? d10.reduce((s, c, i) => s + c * (i + 1), 0) / rolls10 : 0;
   const scores = Object.entries(H.scores).sort((a, b) => b[1] - a[1]).slice(0, 6);
   const clubs = Object.entries(H.clubs).filter(([id]) => team(id)).map(([id, c]) => ({ id, ...c, pct: c.p ? c.w / c.p : 0, avg: c.rolls ? c.faces / c.rolls : 0 }));
   const sorters = { t: (a, b) => b.t - a.t || b.fin - a.fin || b.w - a.w, w: (a, b) => b.w - a.w, f: (a, b) => b.f - a.f, pct: (a, b) => b.pct - a.pct, avg: (a, b) => b.avg - a.avg, up: (a, b) => b.up - a.up || a.down - b.down, p: (a, b) => b.p - a.p };
@@ -149,9 +153,10 @@ export function almanacHTML() {
   const players = Object.entries(H.players).sort((a, b) => b[1] - a[1]).slice(0, 15);
   const chip = (k, l) => `<button class="chip${almSort === k ? ' on' : ''}" data-act="almsort" data-v="${k}">${l}</button>`;
   return `<div class="round-head"><h2 class="round-title">The almanac</h2>
-    <p class="sub">${[H.tours ? plural(H.tours, 'cup') : '', H.seasons ? plural(H.seasons, 'season') : ''].filter(Boolean).join(' and ') || 'Nothing'} finished, ${plural(H.matches, 'match', 'matches')} rolled, ${plural(H.goals, 'goal')} (${(H.goals / H.matches).toFixed(2)} a game), ${plural(rolls, 'die', 'dice')} thrown.</p></div>
+    <p class="sub">${[H.tours ? plural(H.tours, 'cup') : '', H.seasons ? plural(H.seasons, 'season') : ''].filter(Boolean).join(' and ') || 'Nothing'} finished, ${plural(H.matches, 'match', 'matches')} rolled, ${plural(H.goals, 'goal')} (${(H.goals / H.matches).toFixed(2)} a game), ${plural(rolls + rolls10, 'die', 'dice')} thrown.</p></div>
     <div class="alm-grid">
-      <div class="alm-card"><h3>How the dice have behaved</h3>${diceChart(H)}<p class="note" style="margin:0">Average roll ${avgFace.toFixed(2)}, against a fair 3.50. Sixes, the nils, are in pink.</p></div>
+      ${rolls ? `<div class="alm-card"><h3>How the six-sided dice have behaved</h3>${diceChart(H.dice, 5)}<p class="note" style="margin:0">Average roll ${avgFace.toFixed(2)}, against a fair 3.50. Sixes, the nils, are in pink.</p></div>` : ''}
+      ${rolls10 ? `<div class="alm-card"><h3>How the ten-sided dice have behaved</h3>${diceChart(H.dice10, -1)}<p class="note" style="margin:0">Average roll ${avg10.toFixed(2)}, against a fair 5.50.${H.pens ? ` ${plural(H.pens, 'cup tie')} settled on penalties.` : ''}</p></div>` : ''}
       <div class="alm-card"><h3>Most common scores</h3><ul class="results">${scores.map(([s, c]) => `<li><span class="sc2">${s}</span> <span class="xs">${plural(c, 'time')}</span></li>`).join('')}</ul></div>
     </div>
     <div class="book-sec"><h3>Look up a club</h3><div class="sheet-row"><input id="almClub" list="almlist" placeholder="type a club…" aria-label="Club" value="${almClub ? esc(nameOf(almClub)) : ''}"><datalist id="almlist">${clubs.map(c => `<option value="${esc(nameOf(c.id))}">`).join('')}</datalist></div><div id="clubCard">${clubCardHTML(H)}</div></div>
@@ -186,6 +191,8 @@ export function sheetEdHTML() {
 export function drawerHTML() {
   const follows = app.S.follow.filter(id => team(id));
   return `<div class="round-head"><h2 class="round-title">The drawer</h2><p class="sub">Everything that isn't the mug or the book.</p></div>
+    <div class="book-sec"><h3>The dice rules</h3><p class="note">Used for every new cup, season and quick draw. Anything already on the go keeps the rules it started with.</p>${rulesPickerHTML()}</div>
+    <div class="book-sec"><h3>Your own results card</h3>${cardEditorHTML()}</div>
     <div class="book-sec"><h3>How you play</h3>
       <div class="choices">
         <button class="choice${!app.S.shortcuts ? ' on' : ''}" data-act="shortcuts" data-v="0"><strong>All by hand</strong><span>Press and hold the mug to rummage, let go to pull. Press and hold a die to shake it, let go to throw.</span></button>

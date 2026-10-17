@@ -10,6 +10,7 @@ import { PRESETS, QUICK_CORE } from '../src/engine/presets.js';
 import { needsLine } from '../src/engine/tension.js';
 import { newAlmanac, recordMatch } from '../src/engine/almanac.js';
 import { createLeague, leagueTable } from '../src/engine/league.js';
+import * as RU from '../src/engine/rules.js';
 
 const data = JSON.parse(readFileSync(new URL('../data/teams.json', import.meta.url)));
 const squads = JSON.parse(readFileSync(new URL('../data/squads.json', import.meta.url)));
@@ -17,11 +18,13 @@ const teams = Object.fromEntries(data.teams.map(t => [t.id, t]));
 setEnv({ teams, squads, rng: seeded('mug') });
 const ids = data.teams.map(t => t.id);
 
-// Play one match with the rules: 1-5 goals, 6 nil, extra dice until somebody blinks.
+// Play one match with whatever rules are in force, the way the screen does it.
 function play(item, ctxFor) {
   const m = item.m;
-  m.fh = d6(); m.fa = d6(); setScores(m);
-  if (item.t) while (C.tieStatus(item.t, item.r) === 'extra') { const a = d6(), b = d6(); m.x.push([goals(a), goals(b)]); m.xf.push([a, b]); }
+  RU.prepare(m);
+  if (RU.formDiePending(m)) RU.throwForm(m);
+  RU.throwSide(m, 'h'); RU.throwSide(m, 'a'); setScores(m);
+  if (item.t) while (C.tieStatus(item.t, item.r) === 'extra') { if (RU.expanded()) RU.throwPens(m); else RU.throwExtraPair(m); }
   completeMatch(m, ctxFor ? ctxFor(item) : { winner: null, knockout: !!item.t });
 }
 function runCup(c, H) {
@@ -132,4 +135,108 @@ test('league table and live tension', () => {
   assert.equal(lg.matches.length, 56);
   assert.equal(lg.mdCount, 14);
   assert.equal(leagueTable(lg).length, 8);
+});
+
+const withRules = (st, fn) => { setEnv({ rules: RU.makeRules(st) }); try { fn(); } finally { setEnv({ rules: RU.CLASSIC }); } };
+
+test('the standard results card', () => {
+  const t = RU.tally(RU.STANDARD_CARD);
+  assert.equal(t.hw, 44); assert.equal(t.d, 27); assert.equal(t.aw, 29);
+  assert.ok(t.goals > 2.4 && t.goals < 2.9, `goals ${t.goals}`);
+  const wins = RU.STANDARD_CARD.map(r => r.filter(([h, a]) => h > a).length);
+  for (let i = 1; i < 10; i++) assert.ok(wins[i] >= wins[i - 1], 'higher home die is never worse');
+  assert.deepEqual(RU.STANDARD_CARD[0][0], [1, 0]);
+  assert.deepEqual(RU.STANDARD_CARD[9][9], [4, 5]);
+  assert.equal(RU.STANDARD_PENS.filter(e => e[0] === 'h').length, 5);
+});
+
+test('random and custom cards keep the same squares', () => {
+  withRules({ dice: 'expanded', card: 'random' }, () => {
+    const t = RU.tally(env.rules.card);
+    assert.equal(t.hw, 44); assert.equal(t.d, 27);
+  });
+  const text = RU.cardToText(RU.STANDARD_CARD).flat();
+  text[5] = 'nonsense';
+  assert.throws(() => RU.makeRules({ dice: 'expanded', card: 'custom', customCard: text, customPens: RU.pensToText(RU.STANDARD_PENS) }));
+  text[5] = '7-7';
+  const r = RU.makeRules({ dice: 'expanded', card: 'custom', customCard: text, customPens: RU.pensToText(RU.STANDARD_PENS) });
+  assert.deepEqual(r.card[0][5], [7, 7]);
+});
+
+for (const p of PRESETS) {
+  test(`expanded rules with form: ${p.name}`, () => {
+    setEnv({ formOf: id => RU.formFromLast((H0.clubs[id] || {}).last) });
+    withRules({ dice: 'expanded', card: 'high', form: true }, () => {
+      const c = C.createCompetition({ name: p.name, stages: p.stages, size: p.size === 'all' ? 'all' : p.size, teamIds: ids });
+      runCup(c, H0);
+      assert.equal(c.phase, 'done');
+      const ms = C.allMatches(c).filter(m => m.done);
+      assert.ok(ms.every(m => m.fh >= 1 && m.fh <= 10 && m.fa >= 1 && m.fa <= 10));
+    });
+  });
+}
+const H0 = newAlmanac();
+
+test('expanded penalties decide level ties', () => {
+  withRules({ dice: 'expanded', card: 'high' }, () => {
+    let pens = 0;
+    for (let k = 0; k < 20; k++) {
+      const c = runCup(C.createCompetition({ name: 'x', stages: [{ type: 'ko', legs: 1, level: 'dice', until: 1 }], size: 32, teamIds: ids }));
+      C.allMatches(c).forEach(m => { if (m.pk) { pens++; assert.equal(m.hs, m.as); assert.equal(m.x.length, 0); } });
+    }
+    assert.ok(pens > 20, `penalties ${pens}`);
+  });
+});
+
+test('classic form: two dice, keep the better or worse', () => {
+  setEnv({ formOf: id => (id === 'celtic' ? 1 : id === 'rangers' ? -1 : 0) });
+  withRules({ dice: 'classic', form: true }, () => {
+    for (let k = 0; k < 200; k++) {
+      const m = newMatch('celtic', 'rangers');
+      RU.throwSide(m, 'h'); RU.throwSide(m, 'a');
+      const g = f => (f === 6 ? 0 : f);
+      assert.equal(g(m.fh), Math.max(g(m.fhx[0]), g(m.fhx[1])));
+      assert.equal(g(m.fa), Math.min(g(m.fax[0]), g(m.fax[1])));
+    }
+  });
+});
+
+test('expanded form die goes to the right side', () => {
+  const cases = [[1, 0, 'h', false], [0, -1, 'h', false], [1, -1, 'h', true], [-1, 1, 'a', true], [1, 1, null], [-1, -1, null], [0, 1, 'a', false]];
+  for (const [fh, fa, side, big] of cases) {
+    setEnv({ formOf: id => (id === 'celtic' ? fh : fa) });
+    withRules({ dice: 'expanded', card: 'high', form: true }, () => {
+      const m = RU.prepare(newMatch('celtic', 'rangers'));
+      if (!side) assert.equal(m.fp, null);
+      else { assert.equal(m.fp.s, side); assert.equal(m.fp.big, big); }
+    });
+  }
+});
+
+test('expanded needs lines read the card', () => {
+  withRules({ dice: 'expanded', card: 'high' }, () => {
+    const m = newMatch('celtic', 'albion-rovers'); RU.prepare(m); m.fh = 1;
+    const line = needsLine({ m });
+    assert.match(line, /A 5 or higher and Albion Rovers win it/);
+    assert.match(line, /A 1 and they lose/);
+    m.fh = 10;
+    assert.match(needsLine({ m }), /A 10 and Albion Rovers win it/);
+  });
+});
+
+test('a whole season under expanded rules', () => {
+  withRules({ dice: 'expanded', card: 'random', form: true }, () => {
+    const s = S.createSeasonDraw({ teamIds: ids, regions: 4, seeded: false });
+    S.seasonTip(s); s.my = s.regions[0].divs[0].teams[0]; S.beginSeason(s);
+    let guard = 0;
+    while (s.phase === 'run' && guard++ < 1000) {
+      if (S.cupsToDraw(s).length) { S.tipOtherCups(s, -1); S.finishCupDraws(s); }
+      const wc = S.worldComp(s);
+      if (wc && wc.phase === 'draw') { C.tipOut(wc); C.finishDraw(wc); }
+      S.stepItems(s).forEach(it => { if (!it.m.done) { play(it, x => S.matchContext(s, x)); recordMatch(H0, it.m); } });
+      S.advanceSeason(s);
+    }
+    assert.equal(s.phase, 'end');
+    assert.ok(H0.dice10.reduce((a, b) => a + b, 0) > 1000);
+  });
 });

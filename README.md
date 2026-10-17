@@ -34,6 +34,31 @@ Extra dice until somebody blinks. League and group games can finish level.
 - **Tear out the page**: a picture of the winner's page, or your club's season,
   to save or send.
 
+## Dice rules
+
+Pick them in the drawer, or on the cup and season setup pages. Each cup and
+season keeps the rules it started with.
+
+- **Classic dice**: one six-sided die each. 1 to 5 is goals, a six is nil.
+  Level in a cup tie? Extra dice until somebody blinks.
+- **Expanded dice rules**: two ten-sided dice and a 10×10 results card. The red
+  (home) die picks the row, the blue (away) die picks the square. Every square
+  is 1% of matches. Level in a cup tie? One roll of the green die on the
+  penalty card. Three cards:
+  - *Higher dice is better*: the standard card (44% home wins, 27% draws,
+    29% away wins, about 2.6 goals a game).
+  - *Fully random*: the same squares shuffled once per cup or season.
+  - *Your own card*: fill in all 100 squares and the penalty card in the drawer.
+- **Form** (optional, either rules): a club that has won its last three
+  anywhere in the book is in form; lost its last three, out of form.
+  Classic: two dice, keep the better (in form) or the worse (out of form).
+  Expanded: the form die (four 0s, a 1, a 2) is added to the in-form side, or
+  to whoever is facing an out-of-form side. In form against out of form gets
+  the big form die (two 0s, three 1s, a 2). Two in form, or two out of form,
+  cancel out.
+
+The standard card lives in `src/engine/rules.js` if you want to retune it.
+
 ## Running it
 
 `index.html` is the whole game in one file: styles, code and club data all

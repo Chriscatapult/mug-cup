@@ -16,7 +16,10 @@ import { env, setEnv, nameOf, team } from './engine/env.js';
 import { newAlmanac } from './engine/almanac.js';
 import * as C from './engine/competition.js';
 import { PRESETS } from './engine/presets.js';
-import { clone, pow2floor } from './engine/util.js';
+import { clone, pow2floor, shuffle } from './engine/util.js';
+import * as RU from './engine/rules.js';
+import { fullCardHTML } from './ui/card.js';
+import { ensureCustom, tallyText } from './ui/rulespick.js';
 
 /* ---------- routing ---------- */
 const TABS = [['home', 'The floor'], ['mug', 'The mug'], ['book', 'The book'], ['almanac', 'The almanac'], ['drawer', 'The drawer']];
@@ -27,16 +30,19 @@ function renderTabs() {
   setHTML('#tabs', TABS.map(([v, l]) => `<button class="tab${tabOf(app.view) === v ? ' on' : ''}" data-act="go" data-v="${v}" ${tabOf(app.view) === v ? 'aria-current="page"' : ''}>${l}</button>`).join('') +
     `<span class="tools">${wallOK ? '<button class="tool-btn" data-act="wall" title="Wallchart (W)">Wallchart</button>' : ''}<button class="tool-btn${app.S.sound ? '' : ' off'}" data-act="sound" title="Sound (M)" aria-pressed="${app.S.sound}">${SPEAKER(app.S.sound)}<span>${app.S.sound ? 'Sound on' : 'Sound off'}</span></button><button class="tool-btn" data-act="help" title="Keys (?)" aria-label="Keyboard keys">?</button></span>`);
 }
+// The rules travel with each cup and season; whatever's on screen sets them for the engine.
+function useRules(game) { setEnv({ rules: (game && game.rules) || RU.CLASSIC }); }
 function mugHTML() {
   PL.setSession(null); D.setProvider(null);
   if (app.active === 'season' && app.season) {
+    useRules(app.season);
     const v = SM.seasonView(render);
     if (v.kind === 'draw') { D.setProvider(v.provider); return D.drawHTML(); }
     if (v.kind === 'play') { PL.setSession(v.session); return PL.playHTML(); }
     return v.html;
   }
   if (app.cup) {
-    app.active = 'cup';
+    app.active = 'cup'; useRules(app.cup);
     if (app.cup.phase === 'draw') { D.setProvider(cupProvider(render)); return D.drawHTML(); }
     if (app.cup.phase === 'play') { PL.setSession(cupSession(render)); return PL.playHTML(); }
     return winnersHTML(app.cup, { kicker: app.cup.quick ? 'The quick draw' : '' });
@@ -150,7 +156,7 @@ function resultsText() {
   c.stages.slice().reverse().forEach(st => { if (st && st.type === 'ko') st.rounds.slice().reverse().forEach(r => {
     const res = r.ties.filter(t => t.matches.some(m => m.done)); if (!res.length) return;
     lines.push('', r.name.replace(/^The /, ''));
-    res.forEach(t => t.matches.filter(m => m.done).forEach(m => lines.push(`${nameOf(m.h)} ${m.hs}-${m.as} ${nameOf(m.a)}${m.x.length ? ' (extra dice)' : ''}`)));
+    res.forEach(t => t.matches.filter(m => m.done).forEach(m => lines.push(`${nameOf(m.h)} ${m.hs}-${m.as} ${nameOf(m.a)}${m.x.length ? ' (extra dice)' : m.pk ? ` (${m.pk.s} on penalties)` : ''}`)));
   }); });
   lines.push('', 'Rolled on The Mug Cup');
   return lines.join('\n');
@@ -181,15 +187,15 @@ document.addEventListener('click', async e => {
     case 'go': closeOverlay(); go(v, b.dataset.mode); break;
     case 'quick':
       if (!confirmThrowAway(app.cup && app.cup.phase !== 'done' ? app.cup : null, 'cup')) return;
-      quickDraw(); SND.rustle(0.6); go('mug', 'cup'); break;
+      if (!tryRules(() => quickDraw())) return; SND.rustle(0.6); go('mug', 'cup'); break;
     case 'startcup':
       if (!confirmThrowAway(app.cup && app.cup.phase !== 'done' ? app.cup : null, 'cup')) return;
       app.S.name = ($('#tname') && $('#tname').value.trim()) || app.S.name; saveS();
-      startCup(); SND.rustle(0.6); go('mug', 'cup'); break;
+      if (!tryRules(() => startCup())) return; SND.rustle(0.6); go('mug', 'cup'); break;
     case 'startseason':
       if (!confirmThrowAway(app.season, 'season world')) return;
       app.S.sName = ($('#sname') && $('#sname').value.trim()) || app.S.sName; saveS();
-      SM.startSeasonDraw(); SND.rustle(0.8); go('mug', 'season'); break;
+      if (!tryRules(() => SM.startSeasonDraw())) return; SND.rustle(0.8); go('mug', 'season'); break;
     case 'pool': { const k = b.dataset.k; app.S[k] = app.S[k] || [...app.S.pools]; const id = b.dataset.id; app.S[k] = app.S[k].includes(id) ? app.S[k].filter(x => x !== id) : app.S[k].concat(id); saveS(); render(); break; }
     case 'slip': { const id = b.dataset.id; app.S.off = app.S.off.includes(id) ? app.S.off.filter(x => x !== id) : app.S.off.concat(id); saveS(); render(); break; }
     case 'addc': addCustom(); break;
@@ -210,6 +216,13 @@ document.addEventListener('click', async e => {
     case 'strm': if (app.S.stages.length > 1) { app.S.stages.splice(+b.dataset.i, 1); app.S.preset = 'custom'; saveS(); render(); } break;
     case 'sregions': app.S.sRegions = +v; saveS(); render(); break;
     case 'sseeded': app.S.sSeeded = v === '1'; saveS(); render(); break;
+    case 'dice': app.S.dice = v; saveS(); render(); break;
+    case 'cardmode': app.S.card = v; if (v === 'custom') ensureCustom(); saveS(); render(); break;
+    case 'form': app.S.form = v === '1'; saveS(); render(); break;
+    case 'cardstd': ensureCustom(); app.S.customCard = RU.cardToText(RU.STANDARD_CARD).flat(); app.S.customPens = RU.pensToText(RU.STANDARD_PENS); saveS(); render(); break;
+    case 'cardshuffle': ensureCustom(); app.S.customCard = shuffle(app.S.customCard.slice()); app.S.customPens = shuffle(app.S.customPens.slice()); saveS(); render(); break;
+    case 'cardclear': if (confirm('Rub out every square on your card?')) { app.S.customCard = Array(100).fill(''); app.S.customPens = Array.from({ length: 10 }, (_, k) => [k < 5 ? 'a' : 'h', '']); saveS(); render(); } break;
+    case 'showcard': { const g = app.active === 'season' ? app.season : app.cup; if (g && g.rules && g.rules.dice === 'expanded') openOverlay(fullCardHTML(g.rules, `${g.name}: the results card`)); break; }
     case 'speed': app.S.speed = v; saveS(); document.querySelectorAll('[data-act="speed"]').forEach(x => x.classList.toggle('on', x.dataset.v === app.S.speed)); break;
     case 'shortcuts':
       app.S.shortcuts = v === '1'; saveS();
@@ -298,6 +311,9 @@ document.addEventListener('click', async e => {
   }
 });
 let currentSheet = null;
+function tryRules(fn) {
+  try { fn(); return true; } catch (e) { app.flash = esc(e.message || String(e)); render(); window.scrollTo({ top: 0, behavior: 'smooth' }); return false; }
+}
 function toggleSound() { app.S.sound = !app.S.sound; saveS(); renderTabs(); if (app.S.sound) { SND.unlock(); SND.rattle(); } }
 function addCustom() {
   const inp = $('#customIn'); if (!inp) return;
@@ -316,6 +332,7 @@ document.addEventListener('pointerdown', e => {
   if (!g || app.busy || app.auto || (e.pointerType === 'mouse' && e.button !== 0)) return;
   e.preventDefault();
   const kind = g.dataset.grab;
+  if (kind !== 'mug' && kind !== 'x') PL.openCard(+g.dataset.i);
   const shakers = kind === 'x' ? [...g.closest('.xpair').querySelectorAll('.die')] : kind === 'mug' ? [g.closest('.mug-stage') || g] : [g];
   shakers.forEach(s => s.classList.add('shaking'));
   document.body.classList.add('grabbing');
@@ -367,6 +384,7 @@ document.addEventListener('keydown', e => {
   const k = e.key.toLowerCase();
   if (k === 'w') { $('#overlay') ? closeOverlay() : openWall(); return; }
   if (k === 'm') { toggleSound(); return; }
+  if (k === 'c' && app.view === 'mug') { clickAct('showcard'); return; }
   if (e.key === '?') { openHelp(); return; }
   if (!app.S.shortcuts || app.view !== 'mug' || $('#overlay')) return;
   SND.unlock();
@@ -381,6 +399,19 @@ document.addEventListener('keydown', e => {
   else if (k === 'n') { const b = document.querySelector('#main [data-act="next"], #main [data-act="drawfinish"], #main [data-act="seasonnext"]'); if (b) b.click(); }
 });
 document.addEventListener('input', e => {
+  const el = e.target;
+  if (el.classList && el.classList.contains('cc')) {
+    ensureCustom(); app.S.customCard[+el.dataset.k] = el.value; saveS();
+    el.classList.toggle('bad', !RU.parseScore(el.value));
+    const t = $('#cardTally'); if (t) t.innerHTML = tallyText();
+    return;
+  }
+  if (el.dataset && el.dataset.pk !== undefined) {
+    ensureCustom(); app.S.customPens[+el.dataset.pk][1] = el.value; saveS();
+    const p = RU.parseScore(el.value); el.closest('.pe').classList.toggle('bad', !p || p[0] <= p[1]);
+    const t = $('#cardTally'); if (t) t.innerHTML = tallyText();
+    return;
+  }
   if (e.target.id === 'tname') { app.S.name = e.target.value; saveS(); }
   if (e.target.id === 'sname') { app.S.sName = e.target.value; saveS(); }
 });
@@ -395,6 +426,10 @@ document.addEventListener('change', e => {
   } else if (el.id === 'bookRegion') { setBookRegion(+el.value); render(); }
   else if (el.id === 'sizeIn') { const n = Math.round(+el.value); if (n >= 2) { app.S.size = n; saveS(); render(); } }
   else if (el.id === 'importFile' && el.files && el.files[0]) importFile(el.files[0]);
+  else if (el.dataset && el.dataset.pw !== undefined) {
+    ensureCustom(); app.S.customPens[+el.dataset.pw][0] = el.value; saveS();
+    const t = $('#cardTally'); if (t) t.innerHTML = tallyText();
+  }
   else if (el.dataset && el.dataset.st !== undefined) {
     const st = app.S.stages[+el.dataset.st], k = el.dataset.k, val = el.value;
     if (k === 'join') st.join = val ? val.split(',').map(Number) : [];
@@ -426,6 +461,7 @@ async function boot() {
   }
   await loadAll();
   syncTeams();
+  setEnv({ formOf: id => RU.formFromLast((app.H.clubs[id] || {}).last) });
   if (readDesignFromHash()) app.view = 'cupsetup';
   else if (app.season && app.season.phase !== 'end') { app.active = 'season'; }
   else if (app.cup && app.cup.phase !== 'done') { app.active = 'cup'; }
