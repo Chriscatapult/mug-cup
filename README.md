@@ -67,8 +67,9 @@ It's the only file Vercel or GitHub Pages actually needs.
 
 ## Putting it online
 
-**Vercel**: import the GitHub repo with framework preset "Other", no build
-command, and the output directory left as the root. Even if only `index.html`
+**Vercel**: import the GitHub repo with framework preset "Other". There is
+nothing to build: Vercel just serves `index.html`, which is already the whole
+game. (That is why the rebuild command is called `make`, not `build`.) Even if only `index.html`
 makes it into the repo, the site works.
 
 **GitHub Pages**: Settings, then Pages, serve from the `main` branch root.
@@ -85,7 +86,7 @@ npm run dev          # then open http://localhost:5173/dev.html
 When you're happy, rebuild the one-file version and commit it:
 
 ```
-npm run build        # rewrites index.html from dev.html, css/ and src/
+npm run make         # rewrites index.html from dev.html, css/ and src/
 npm test             # plays every ready-made cup and a whole season
 ```
 
