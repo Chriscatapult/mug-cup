@@ -34,6 +34,9 @@ export function pickFeatured(items, memo, key) {
 }
 const followed = id => app.S.follow.includes(id);
 export const isFollowedMatch = m => followed(m.h) || followed(m.a);
+// The ones "roll everything but…" leaves for you: the tie of the round, and your own club's match.
+function keep(i, it) { return i === S.featured() || !!(S.mine && S.mine(it)); }
+let split = false;   // true while the page shows "Still to throw" above "Results"
 function special(i, it) { return S.special ? S.special(i, it) : (i === S.featured() || isFollowedMatch(it.m) || !!S.pivot(it)); }
 
 /* ---------- rendering ---------- */
@@ -121,8 +124,8 @@ export function rowHTML(it, i) {
   const yours = S.mine && S.mine(it);
   const card = ex && cardM === m ? cardHTML(m, i) : '';
   return `<div class="fx${done ? ' done' : ''}${feat ? ' feat' : ''}${pv && !done ? ' pivotal' : ''}${yours ? ' yours' : ''}${ex ? ' ex' : ''}" id="fx-${i}">
-    ${pv ? `<span class="feat-tag pv">${esc(cap(pv))}</span>` : feat ? '<span class="feat-tag">Tie of the round</span>' : yours ? '<span class="feat-tag mine">Your lot</span>' : ''}
-    ${it.label && S.showLabels ? `<span class="fx-label">${esc(it.label)}</span>` : ''}
+    ${feat ? `<span class="feat-tag${pv ? ' pv' : ''}">Tie of the round${pv ? `: ${esc(pv)}` : ''}</span>` : pv ? `<span class="feat-tag pv">${esc(cap(pv))}</span>` : yours ? '<span class="feat-tag mine">Your lot</span>' : ''}
+    ${it.label && (S.showLabels || (split && !done)) ? `<span class="fx-label">${esc(it.label)}</span>` : ''}
     <div class="fx-main">
       <span class="tm home${wH ? ' win' : ''}">${starHTML(m.h)}${esc(nameOf(m.h))}</span>
       ${diceFor(m, i, 'h')}<span class="sc h${nilH ? ' nil' : ''}">${scH}</span><span class="dash">–</span><span class="sc a${nilA ? ' nil' : ''}">${scA}</span>${diceFor(m, i, 'a')}
@@ -144,12 +147,19 @@ export function ctlHTML() {
     const nl = S.nextLabel();
     return `<span class="progress">All ${plural(total, 'match', 'matches')} rolled.</span>${nl ? `<button class="btn red" data-act="next">${esc(nl)}</button>` : ''}`;
   }
+  const items = S.items(), off = app.busy || app.auto ? 'disabled' : '';
   const rest = restCount();
-  const restBtn = rest > 0 && total > 1 ? `<button class="btn ghost" data-act="rollrest" ${app.busy || app.auto ? 'disabled' : ''} title="Leaves your matches, the big ones and the tie of the round for you to throw">Roll the other ${plural(rest, 'match', 'matches')} for me</button>` : '';
+  const but = items.filter((it, i) => !it.m.done && !keep(i, it)).length;
+  const kept = items.map((it, i) => [it, i]).filter(([it, i]) => !it.m.done && keep(i, it));
+  const keepsFeat = kept.some(([, i]) => i === S.featured()), keepsMine = kept.some(([it]) => S.mine && S.mine(it));
+  const butLabel = keepsFeat && keepsMine ? 'everything but your match and the tie of the round' : keepsFeat ? 'everything but the tie of the round' : keepsMine ? 'everything but your match' : `all ${plural(but, 'match', 'matches')}`;
+  const butBtn = but > 0 && total > 1 ? `<button class="btn ghost" data-act="rollbut" ${off} title="Rolls the whole round for you in one go">Roll ${butLabel}${kept.length ? ` (${but})` : ''}</button>` : '';
+  const restBtn = rest > 0 && total > 1 && rest !== but ? `<button class="btn ghost" data-act="rollrest" ${off} title="Leaves your matches, the big ones and the tie of the round for you to throw">Roll ${plural(rest, 'match', 'matches')}, leave the big ones</button>` : '';
+  const restBtnAll = restBtn + butBtn;
   const prog = `<span class="progress">${played} of ${plural(total, 'match', 'matches')} rolled</span>`;
-  if (!app.S.shortcuts) return `${prog}${restBtn}<span class="play-tip">Press and hold a die to shake it. Let go to throw.</span>`;
+  if (!app.S.shortcuts) return `${prog}${restBtnAll}<span class="play-tip">Press and hold a die to shake it. Let go to throw.</span>`;
   const sp = `<div class="chips mini" role="group" aria-label="Speed">${Object.entries(SPEEDS).map(([k, v]) => `<button class="chip${app.S.speed === k ? ' on' : ''}" data-act="speed" data-v="${k}">${v.label}</button>`).join('')}</div>`;
-  return `${prog}${restBtn}<button class="btn" data-act="rollnext" ${app.busy || app.auto ? 'disabled' : ''}>Roll the next match</button>
+  return `${prog}${restBtnAll}<button class="btn" data-act="rollnext" ${app.busy || app.auto ? 'disabled' : ''}>Roll the next match</button>
     <button class="btn ghost" data-act="rollall" ${app.busy && !app.auto ? 'disabled' : ''}>${app.auto ? 'Stop after this one' : 'Roll them all'}</button>${sp}`;
 }
 function footHTML() { const { total, played } = counts(); const nl = S.nextLabel(); return played < total || !nl ? '' : `<button class="btn big red" data-act="next">${esc(nl)}</button>`; }
@@ -161,12 +171,22 @@ function rulesStrip() {
 export function playHTML() {
   const items = S.items(), vis = S.visible ? S.visible() : items.map((_, i) => i);
   if (cardM && !items.some(it => it.m === cardM)) cardM = null;
+  // Once some are played and some aren't, the ones still to throw go to the top.
+  const todo = vis.filter(i => !items[i].m.done), done = vis.filter(i => items[i].m.done);
+  split = todo.length > 0 && done.length > 0;
   let rows = '', lastLabel = null;
-  vis.forEach(i => {
+  const listed = list => list.forEach(i => {
     const it = items[i];
-    if (S.group && it.label && it.label !== lastLabel) { rows += `<h3 class="glabel">${esc(it.label)}</h3>`; lastLabel = it.label; }
+    if (S.group && it.label && it.label !== lastLabel && !(split && !it.m.done)) { rows += `<h3 class="glabel">${esc(it.label)}</h3>`; lastLabel = it.label; }
     rows += rowHTML(it, i);
   });
+  if (split) {
+    const rank = i => (i === S.featured() ? 0 : S.mine && S.mine(items[i]) ? 1 : S.pivot(items[i]) ? 2 : 3);
+    rows += `<h3 class="sect" id="todo-head">Still to throw <span class="xs">(${todo.length})</span></h3>`;
+    listed(todo.slice().sort((a, b) => rank(a) - rank(b) || a - b));
+    rows += `<h3 class="sect">Results <span class="xs">(${done.length})</span></h3>`;
+    listed(done);
+  } else listed(vis);
   const hidden = items.length - vis.length;
   const side = S.side ? `<aside class="side" id="side">${S.side()}</aside>` : '';
   return `<div class="round-head">${S.headHTML()}${rulesStrip()}<div id="dreamers">${S.dreamers ? S.dreamers() : ''}</div></div>
@@ -391,6 +411,13 @@ export async function rollBulk(filter, done) {
   done();
 }
 export const rollRest = done => rollBulk((i, it) => !special(i, it), done);
+export const rollBut = done => rollBulk((i, it) => !keep(i, it), done);
+// After a bulk roll: straight to whatever is left to throw.
+export function toNext() {
+  const h = document.getElementById('todo-head');
+  if (h) h.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  else { const d = document.querySelector('.fixtures [data-grab]'); if (d) d.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+}
 export async function rollOne(i) {
   if (app.busy || app.auto) return;
   app.busy = true; refreshBits();

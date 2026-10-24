@@ -38,6 +38,7 @@ export function ctlHTML() {
       <button class="btn ghost small" data-act="keep">${app.auto ? 'Stop pulling' : 'Keep pulling'}</button>
       <button class="btn ghost small" data-act="tip" ${app.auto ? 'disabled' : ''}>Tip the whole mug out</button></div>`;
     else if (rest > 24) h += `<div class="big-hint">That's ${rest} slips to pull. Fancy some help? <button class="btn ghost small" data-act="tip" style="margin-top:6px">Tip the whole mug out</button></div>`;
+    else if (rest > 1) h += `<p class="hint"><button class="linkish" data-act="tip">Tip the rest out</button></p>`;
     return h;
   }
   return `<p class="mug-count">The draw is done.</p>${P.leftovers ? P.leftovers() : ''}<div class="draw-btns"><button class="btn big red" data-act="drawfinish">${esc(P.finishLabel || 'Get the dice out')}</button></div>`;

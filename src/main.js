@@ -256,7 +256,8 @@ document.addEventListener('click', async e => {
     // the dice
     case 'rollnext': { const i = PL.nextUnplayed(); if (i >= 0) PL.rollOne(i); break; }
     case 'rollall': PL.rollAll(render); break;
-    case 'rollrest': if (!app.busy && !app.auto) { app.busy = true; await PL.rollRest(() => { app.busy = false; render(); }); } break;
+    case 'rollrest': if (!app.busy && !app.auto) { app.busy = true; await PL.rollRest(() => { app.busy = false; render(); PL.toNext(); }); } break;
+    case 'rollbut': if (!app.busy && !app.auto) { app.busy = true; await PL.rollBut(() => { app.busy = false; render(); PL.toNext(); }); } break;
     case 'next': {
       if (app.busy) return;
       const s = PL.session(); if (!s) return;

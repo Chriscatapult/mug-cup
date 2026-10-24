@@ -757,3 +757,5 @@ footer{color:#e7edf3;opacity:.85}
 }
 .needs .die.d10.pen{width:40px;height:44px;margin-left:8px}
 .pc .ps{font-weight:700}
+.sect{font-family:var(--print);font-weight:400;font-size:24px;color:var(--brown);margin:18px 0 4px;padding-bottom:2px;border-bottom:2px dashed #d8cbb0;scroll-margin-top:150px}
+.sect:first-child{margin-top:6px}
